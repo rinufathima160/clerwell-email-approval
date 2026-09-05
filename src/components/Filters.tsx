@@ -22,24 +22,66 @@ function Filters({
   clearFilters,
 }: FiltersProps) {
   return (
-    <section className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-4 shadow-xl shadow-black/10 sm:p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-zinc-100">
+            Filter queue
+          </h2>
+          <p className="mt-1 text-xs text-zinc-500">
+            Find emails that need your attention
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="rounded-lg px-3 py-2 text-xs font-medium text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-violet-500/40"
+        >
+          Clear all
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {/* Search */}
-        <input
-          type="text"
-          placeholder="Search emails..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label="Search emails"
-          className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
-        />
+        <div className="relative">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500"
+            aria-hidden="true"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="6.5"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            />
+            <path
+              d="M16 16L20 20"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          </svg>
+
+          <input
+            type="text"
+            placeholder="Search emails..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search emails"
+            className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-950 pl-10 pr-3 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 hover:border-zinc-600 focus:border-violet-500/70 focus:ring-2 focus:ring-violet-500/10"
+          />
+        </div>
 
         {/* Priority */}
         <select
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
           aria-label="Filter by priority"
-          className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+          className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-300 outline-none transition hover:border-zinc-600 focus:border-violet-500/70 focus:ring-2 focus:ring-violet-500/10"
         >
           <option value="all">All priorities</option>
           <option value="critical">Critical</option>
@@ -53,7 +95,7 @@ function Filters({
           value={riskFilter}
           onChange={(e) => setRiskFilter(e.target.value)}
           aria-label="Filter by risk"
-          className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+          className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-300 outline-none transition hover:border-zinc-600 focus:border-violet-500/70 focus:ring-2 focus:ring-violet-500/10"
         >
           <option value="all">All risks</option>
           <option value="critical">Critical</option>
@@ -67,7 +109,7 @@ function Filters({
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           aria-label="Filter by status"
-          className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+          className="h-11 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-3 text-sm text-zinc-300 outline-none transition hover:border-zinc-600 focus:border-violet-500/70 focus:ring-2 focus:ring-violet-500/10"
         >
           <option value="all">All statuses</option>
           <option value="pending_review">Pending</option>
@@ -75,15 +117,6 @@ function Filters({
           <option value="rejected">Rejected</option>
           <option value="escalated">Escalated</option>
         </select>
-
-        {/* Clear */}
-        <button
-          type="button"
-          onClick={clearFilters}
-          className="h-10 rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100 active:bg-slate-200 sm:col-span-2 lg:col-span-4"
-        >
-          Clear filters
-        </button>
       </div>
     </section>
   );

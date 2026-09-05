@@ -34,29 +34,29 @@ function App() {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [riskFilter, setRiskFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  
+
   useEffect(() => {
-  if (emails.length > 0) {
-    return;
-  }
+    if (emails.length > 0) {
+      return;
+    }
 
-  fetch("/mock-data/emails.json")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to load emails");
-      }
+    fetch("/mock-data/emails.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load emails");
+        }
 
-      return response.json();
-    })
-    .then((data) => {
-      setEmails(data.emails as Email[]);
-      setLoading(false);
-    })
-    .catch(() => {
-      setError("Unable to load emails.");
-      setLoading(false);
-    });
-}, [emails.length]);
+        return response.json();
+      })
+      .then((data) => {
+        setEmails(data.emails as Email[]);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Unable to load emails.");
+        setLoading(false);
+      });
+  }, [emails.length]);
 
   useEffect(() => {
     if (emails.length > 0) {
@@ -103,45 +103,53 @@ function App() {
   };
 
   const selectedIndex = selectedEmail
-  ? emails.findIndex((email) => email.id === selectedEmail.id)
-  : -1;
+    ? emails.findIndex((email) => email.id === selectedEmail.id)
+    : -1;
 
-const handlePrevious = () => {
-  if (selectedIndex <= 0) return;
+  const handlePrevious = () => {
+    if (selectedIndex <= 0) return;
 
-  setSelectedEmail(emails[selectedIndex - 1]);
-};
-
-const handleNext = () => {
-  if (
-    selectedIndex === -1 ||
-    selectedIndex >= emails.length - 1
-  ) {
-    return;
-  }
-
-  setSelectedEmail(emails[selectedIndex + 1]);
-};
-  // Approve email
-  const handleApprove = () => {
-  if (!selectedEmail) return;
-
-  const updatedEmail = {
-    ...selectedEmail,
-    status: "approved",
+    setSelectedEmail(emails[selectedIndex - 1]);
   };
 
-  setEmails((currentEmails) =>
-    currentEmails.map((email) =>
-      email.id === updatedEmail.id ? updatedEmail : email
-    )
-  );
+  const handleNext = () => {
+    if (
+      selectedIndex === -1 ||
+      selectedIndex >= emails.length - 1
+    ) {
+      return;
+    }
 
-  setSelectedEmail(updatedEmail);
-};
-  // Reject email
-  const handleReject = () => {
+    setSelectedEmail(emails[selectedIndex + 1]);
+  };
+
+  const handleApprove = async () => {
     if (!selectedEmail) return;
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, 1000)
+    );
+
+    const updatedEmail = {
+      ...selectedEmail,
+      status: "approved",
+    };
+
+    setEmails((currentEmails) =>
+      currentEmails.map((email) =>
+        email.id === updatedEmail.id ? updatedEmail : email
+      )
+    );
+
+    setSelectedEmail(updatedEmail);
+  };
+
+  const handleReject = async () => {
+    if (!selectedEmail) return;
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, 1000)
+    );
 
     const updatedEmail = {
       ...selectedEmail,
@@ -154,12 +162,15 @@ const handleNext = () => {
       )
     );
 
-   setSelectedEmail(updatedEmail);
+    setSelectedEmail(updatedEmail);
   };
 
-  // Escalate email
-  const handleEscalate = () => {
+  const handleEscalate = async () => {
     if (!selectedEmail) return;
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, 1000)
+    );
 
     const updatedEmail = {
       ...selectedEmail,
@@ -174,41 +185,39 @@ const handleNext = () => {
       )
     );
 
-   setSelectedEmail(updatedEmail);
+    setSelectedEmail(updatedEmail);
   };
 
+  const handleRetry = (guidance: string) => {
+    if (!selectedEmail) return;
 
-// Retry AI analysis with reviewer guidance
-const handleRetry = (guidance: string) => {
-  if (!selectedEmail) return;
-
-  const updatedEmail: Email = {
-    ...selectedEmail,
-    status: "pending_review",
-    aiAnalysis: {
-      ...selectedEmail.aiAnalysis,
-      rationale: `${selectedEmail.aiAnalysis.rationale}
+    const updatedEmail: Email = {
+      ...selectedEmail,
+      status: "pending_review",
+      aiAnalysis: {
+        ...selectedEmail.aiAnalysis,
+        rationale: `${selectedEmail.aiAnalysis.rationale}
 
 Reviewer guidance: ${guidance}
 
 AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
-    },
-    audit: {
-      ...selectedEmail.audit,
-      generatedAt: new Date().toISOString(),
-      modelVersion: `${selectedEmail.audit.modelVersion}-retry`,
-    },
+      },
+      audit: {
+        ...selectedEmail.audit,
+        generatedAt: new Date().toISOString(),
+        modelVersion: `${selectedEmail.audit.modelVersion}-retry`,
+      },
+    };
+
+    setEmails((currentEmails) =>
+      currentEmails.map((email) =>
+        email.id === updatedEmail.id ? updatedEmail : email
+      )
+    );
+
+    setSelectedEmail(updatedEmail);
   };
 
-  setEmails((currentEmails) =>
-    currentEmails.map((email) =>
-      email.id === updatedEmail.id ? updatedEmail : email
-    )
-  );
-
-  setSelectedEmail(updatedEmail);
-};
-  // Save edited response
   const handleSaveDraft = (draft: string) => {
     if (!selectedEmail) return;
 
@@ -227,92 +236,102 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
 
     setSelectedEmail(updatedEmail);
   };
+
   const handleRetryLoad = () => {
-  setError("");
-  setLoading(true);
+    setError("");
+    setLoading(true);
 
-  fetch("/mock-data/emails.json")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to load emails");
-      }
+    fetch("/mock-data/emails.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load emails");
+        }
 
-      return response.json();
-    })
-    .then((data) => {
-      setEmails(data.emails as Email[]);
-      setLoading(false);
-    })
-    .catch(() => {
-      setError("Unable to load emails.");
-      setLoading(false);
-    });
-};
+        return response.json();
+      })
+      .then((data) => {
+        setEmails(data.emails as Email[]);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Unable to load emails.");
+        setLoading(false);
+      });
+  };
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800" />
+          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-700 border-t-violet-400" />
+          </div>
 
-          <h1 className="text-lg font-semibold text-slate-800">
+          <h1 className="text-lg font-semibold text-zinc-100">
             Loading emails...
           </h1>
+
+          <p className="mt-1 text-sm text-zinc-600">
+            Preparing your approval queue
+          </p>
         </div>
       </div>
     );
   }
 
   if (error) {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-xl border border-red-200 bg-white p-6 text-center shadow-sm">
-        <h1 className="text-lg font-semibold text-red-600">
-          {error}
-        </h1>
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+        <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-center shadow-2xl">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-400">
+            !
+          </div>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          We couldn't load the email queue. Please try again.
-        </p>
+          <h1 className="mt-4 text-lg font-semibold text-zinc-100">
+            {error}
+          </h1>
 
-        <button
-          type="button"
-          onClick={handleRetryLoad}
-          className="mt-5 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-        >
-          Try Again
-        </button>
+          <p className="mt-2 text-sm leading-6 text-zinc-500">
+            We couldn't load the email queue. Please try again.
+          </p>
+
+          <button
+            type="button"
+            onClick={handleRetryLoad}
+            className="mt-5 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-  // Email detail page
   if (selectedEmail) {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-zinc-950">
+        <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <EmailDetail
-          key={selectedEmail.id}
-         email={selectedEmail}
-  onBack={() => setSelectedEmail(null)}
-  onPrevious={handlePrevious}
-  onNext={handleNext}
-  currentPosition={selectedIndex + 1}
-  totalEmails={emails.length}
-  onApprove={handleApprove}
-  onReject={handleReject}
-  onEscalate={handleEscalate}
-  onRetry={handleRetry}
-  onSaveDraft={handleSaveDraft}
-/>
+            key={selectedEmail.id}
+            email={selectedEmail}
+            onBack={() => setSelectedEmail(null)}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            currentPosition={selectedIndex + 1}
+            totalEmails={emails.length}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onEscalate={handleEscalate}
+            onRetry={handleRetry}
+            onSaveDraft={handleSaveDraft}
+          />
         </main>
       </div>
     );
   }
 
-  // Main queue
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-zinc-950">
       <Header
         emailCount={filteredEmails.length}
         totalEmails={emails.length}
@@ -332,49 +351,72 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
         />
 
         {filteredEmails.length === 0 ? (
-  <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-    <h2 className="text-lg font-semibold text-slate-900">
-      No emails found
-    </h2>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-8 text-center shadow-xl shadow-black/10">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-800 text-zinc-500">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="6.5"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                />
+                <path
+                  d="M16 16L20 20"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
 
-    <p className="mt-2 text-sm leading-6 text-slate-500">
-      No emails match your current search and filters.
-    </p>
+            <h2 className="mt-4 text-lg font-semibold text-zinc-100">
+              No emails found
+            </h2>
 
-    <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
-      {search.trim() && (
-        <button
-          type="button"
-          onClick={() => setSearch("")}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-        >
-          Clear Search
-        </button>
-      )}
+            <p className="mt-2 text-sm leading-6 text-zinc-500">
+              No emails match your current search and filters.
+            </p>
 
-      {(priorityFilter !== "all" ||
-        riskFilter !== "all" ||
-        statusFilter !== "all") && (
-        <button
-          type="button"
-          onClick={() => {
-            setPriorityFilter("all");
-            setRiskFilter("all");
-            setStatusFilter("all");
-          }}
-          className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-        >
-          Clear Filters
-        </button>
-      )}
-    </div>
-  </div>
-) : (
-  <EmailList
-    emails={filteredEmails}
-    onSelectEmail={setSelectedEmail}
-  />
-)}
+            <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+              {search.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-800"
+                >
+                  Clear Search
+                </button>
+              )}
+
+              {(priorityFilter !== "all" ||
+                riskFilter !== "all" ||
+                statusFilter !== "all") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPriorityFilter("all");
+                    setRiskFilter("all");
+                    setStatusFilter("all");
+                  }}
+                  className="rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <EmailList
+            emails={filteredEmails}
+            onSelectEmail={setSelectedEmail}
+          />
+        )}
       </main>
     </div>
   );
