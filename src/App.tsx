@@ -178,7 +178,6 @@ const handleNext = () => {
     setSelectedEmail(null);
   };
 
-// Retry AI analysis
 
 // Retry AI analysis with reviewer guidance
 const handleRetry = (guidance: string) => {
@@ -305,10 +304,50 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
           clearFilters={clearFilters}
         />
 
-        <EmailList
-          emails={filteredEmails}
-          onSelectEmail={setSelectedEmail}
-        />
+        {filteredEmails.length === 0 ? (
+  <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+    <h2 className="text-lg font-semibold text-slate-900">
+      No emails found
+    </h2>
+
+    <p className="mt-2 text-sm leading-6 text-slate-500">
+      No emails match your current search and filters.
+    </p>
+
+    <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+      {search.trim() && (
+        <button
+          type="button"
+          onClick={() => setSearch("")}
+          className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+        >
+          Clear Search
+        </button>
+      )}
+
+      {(priorityFilter !== "all" ||
+        riskFilter !== "all" ||
+        statusFilter !== "all") && (
+        <button
+          type="button"
+          onClick={() => {
+            setPriorityFilter("all");
+            setRiskFilter("all");
+            setStatusFilter("all");
+          }}
+          className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+        >
+          Clear Filters
+        </button>
+      )}
+    </div>
+  </div>
+) : (
+  <EmailList
+    emails={filteredEmails}
+    onSelectEmail={setSelectedEmail}
+  />
+)}
       </main>
     </div>
   );
