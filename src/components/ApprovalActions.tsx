@@ -4,6 +4,7 @@ type ApprovalActionsProps = {
   onApprove: () => void;
   onReject: () => void;
   onEscalate: () => void;
+  onRetry: (guidance: string) => void;
   onEdit: () => void;
 
   isEditing: boolean;
@@ -19,6 +20,7 @@ function ApprovalActions({
   onApprove,
   onReject,
   onEscalate,
+  onRetry,
   onEdit,
   isEditing,
   draftResponse,
@@ -32,16 +34,21 @@ function ApprovalActions({
     "approve" | "reject" | "escalate" | null
   >(null);
 
+  const [retryOpen, setRetryOpen] = useState(false);
+  const [retryGuidance, setRetryGuidance] = useState("");
   const [message, setMessage] = useState("");
 
   const canApprove = allowedActions.includes("approve_send");
   const canReject = allowedActions.includes("reject");
   const canEdit = allowedActions.includes("edit");
-const canEscalate = allowedActions.includes("escalate");
+  const canEscalate = allowedActions.includes("escalate");
+  const canRetry = allowedActions.includes("retry");
+
   const isPending = status === "pending_review";
   const isApproved = status === "approved";
   const isRejected = status === "rejected";
-    const isEscalated = status === "escalated";
+  const isEscalated = status === "escalated";
+
   const handleConfirm = () => {
     if (confirmation === "approve") {
       onApprove();
@@ -52,15 +59,29 @@ const canEscalate = allowedActions.includes("escalate");
       onReject();
       setMessage("Email rejected successfully.");
     }
-     if (confirmation === "escalate") {
-    onEscalate();
-    setMessage("Email escalated successfully.");
-  }
+
+    if (confirmation === "escalate") {
+      onEscalate();
+      setMessage("Email escalated successfully.");
+    }
+
     setConfirmation(null);
 
     setTimeout(() => {
       setMessage("");
     }, 3000);
+  };
+
+  const handleRetry = () => {
+    const guidance = retryGuidance.trim();
+
+    if (!guidance) {
+      return;
+    }
+
+    onRetry(guidance);
+    setRetryGuidance("");
+    setRetryOpen(false);
   };
 
   if (isEditing) {
@@ -133,21 +154,25 @@ const canEscalate = allowedActions.includes("escalate");
           )}
 
           {isEscalated && (
-  <span className="w-fit rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-700">
-    Escalated
-  </span>
-)}
+            <span className="w-fit rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-700">
+              Escalated
+            </span>
+          )}
         </div>
 
         {/* Success message */}
         {message && (
-          <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+          <div
+            className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
+            role="status"
+            aria-live="polite"
+          >
             ✓ {message}
           </div>
         )}
 
         {/* Actions */}
-        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {isPending && canApprove && (
             <button
               type="button"
@@ -167,15 +192,27 @@ const canEscalate = allowedActions.includes("escalate");
               Reject
             </button>
           )}
-    {isPending && canEscalate && (
-  <button
-    type="button"
-    onClick={() => setConfirmation("escalate")}
-    className="w-full rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-300"
-  >
-    Escalate
-  </button>
-)}
+
+          {isPending && canEscalate && (
+            <button
+              type="button"
+              onClick={() => setConfirmation("escalate")}
+              className="w-full rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-300"
+            >
+              Escalate
+            </button>
+          )}
+
+          {isPending && canRetry && (
+            <button
+              type="button"
+              onClick={() => setRetryOpen(true)}
+              className="w-full rounded-lg border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            >
+              Retry AI Analysis
+            </button>
+          )}
+
           {canEdit && (
             <button
               type="button"
@@ -199,19 +236,19 @@ const canEscalate = allowedActions.includes("escalate");
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-semibold text-slate-900">
-            {confirmation === "approve"
-              ? "Approve this email?"
-              : confirmation === "reject"
-               ? "Reject this email?"
-               : "Escalate this email?"}
+              {confirmation === "approve"
+                ? "Approve this email?"
+                : confirmation === "reject"
+                  ? "Reject this email?"
+                  : "Escalate this email?"}
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
-            {confirmation === "approve"
-             ? "Are you sure you want to approve this email?"
-                 : confirmation === "reject"
+              {confirmation === "approve"
+                ? "Are you sure you want to approve this email?"
+                : confirmation === "reject"
                   ? "Are you sure you want to reject this email?"
-                 : "Are you sure you want to escalate this email?"}
+                  : "Are you sure you want to escalate this email?"}
             </p>
 
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -227,18 +264,83 @@ const canEscalate = allowedActions.includes("escalate");
                 type="button"
                 onClick={handleConfirm}
                 className={`w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition sm:w-auto ${
-                    confirmation === "approve"
+                  confirmation === "approve"
                     ? "bg-emerald-600 hover:bg-emerald-700"
                     : confirmation === "reject"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-orange-600 hover:bg-orange-700"
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-orange-600 hover:bg-orange-700"
                 }`}
               >
                 {confirmation === "approve"
-                ? "Yes, Approve"
-            : confirmation === "reject"
-             ? "Yes, Reject"
-            : "Yes, Escalate"}
+                  ? "Yes, Approve"
+                  : confirmation === "reject"
+                    ? "Yes, Reject"
+                    : "Yes, Escalate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Retry Modal */}
+      {retryOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4"
+          onClick={() => setRetryOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold text-slate-900">
+              Ask AI Worker to Retry
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Tell the AI worker what it should reconsider before generating
+              a new analysis.
+            </p>
+
+            <label
+              htmlFor="retry-guidance"
+              className="mt-5 block text-sm font-medium text-slate-700"
+            >
+              Reviewer guidance
+            </label>
+
+            <textarea
+              id="retry-guidance"
+              value={retryGuidance}
+              onChange={(e) => setRetryGuidance(e.target.value)}
+              rows={5}
+              placeholder="Example: Re-check the refund policy and consider the customer's purchase date."
+              className="mt-2 w-full resize-y rounded-lg border border-slate-300 bg-white p-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              autoFocus
+            />
+
+            <p className="mt-2 text-xs text-slate-500">
+              Guidance is required before retrying.
+            </p>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setRetryGuidance("");
+                  setRetryOpen(false);
+                }}
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:w-auto"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleRetry}
+                disabled={!retryGuidance.trim()}
+                className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+              >
+                Retry AI Analysis
               </button>
             </div>
           </div>

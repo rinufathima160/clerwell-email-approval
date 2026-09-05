@@ -5,18 +5,28 @@ import ApprovalActions from "./ApprovalActions";
 type EmailDetailProps = {
   email: Email;
   onBack: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  currentPosition: number;
+  totalEmails: number;
   onApprove: () => void;
   onReject: () => void;
   onEscalate: () => void;
+  onRetry: (guidance: string) => void;
   onSaveDraft: (draft: string) => void;
 };
 
 function EmailDetail({
   email,
   onBack,
+  onPrevious,
+  onNext,
+  currentPosition,
+  totalEmails,
   onApprove,
   onReject,
     onEscalate,
+     onRetry,
   onSaveDraft,
 }: EmailDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -24,6 +34,34 @@ function EmailDetail({
   const [draftResponse, setDraftResponse] = useState(
     email.draftResponse
   );
+
+  const hasUnsavedChanges =
+  draftResponse !== email.draftResponse;
+
+  const [navigationAction, setNavigationAction] = useState<
+  "back" | "previous" | "next" | null
+>(null);
+
+const handleNavigation = (
+  action: "back" | "previous" | "next"
+) => {
+  if (hasUnsavedChanges) {
+    setNavigationAction(action);
+    return;
+  }
+
+  if (action === "back") {
+    onBack();
+  }
+
+  if (action === "previous") {
+    onPrevious();
+  }
+
+  if (action === "next") {
+    onNext();
+  }
+};
 
   const priorityStyles = {
     critical:
@@ -48,12 +86,15 @@ function EmailDetail({
       "bg-emerald-100 text-emerald-700 border border-emerald-200",
     rejected:
       "bg-red-100 text-red-700 border border-red-200",
+     escalated:
+    "bg-orange-100 text-orange-700 border border-orange-200",
   };
 
   const statusLabels = {
     pending_review: "Pending Review",
     approved: "Approved",
     rejected: "Rejected",
+    escalated: "Escalated",
   };
 
   const statusClass =
@@ -71,11 +112,36 @@ function EmailDetail({
       {/* Back button */}
       <button
         type="button"
-        onClick={onBack}
+        onClick={() => handleNavigation("back")}
         className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
       >
         ← Back to queue
       </button>
+    {/* Email navigation */}
+<div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+  <button
+    type="button"
+    onClick={() => handleNavigation("previous")}
+    disabled={currentPosition === 1}
+    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+  >
+    ← Previous
+  </button>
+
+  <span className="text-sm font-medium text-slate-600">
+    Email {currentPosition} of {totalEmails}
+  </span>
+
+  <button
+    type="button"
+    onClick={() => handleNavigation("next")}
+    disabled={currentPosition === totalEmails}
+    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+  >
+    Next →
+  </button>
+</div>
+
 
       {/* Header */}
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -106,6 +172,15 @@ function EmailDetail({
             >
               {email.priority}
             </span>
+            {/* Labels */}
+{email.labels.map((label) => (
+  <span
+    key={label}
+    className="w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600"
+  >
+    {label}
+  </span>
+))}
           </div>
         </div>
       </section>
@@ -156,7 +231,35 @@ function EmailDetail({
               {email.aiAnalysis.intent}
             </p>
           </div>
+          <div className="rounded-lg bg-slate-50 p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Policy Used
+                </p>
 
+            <p className="mt-1 break-words text-sm font-semibold text-slate-900">
+             {email.aiAnalysis.policyId}
+                 </p>
+            </div>
+
+            <div className="rounded-lg bg-slate-50 p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          Model Version
+          </p>
+
+  <p className="mt-1 break-words text-sm font-semibold text-slate-900">
+    {email.audit.modelVersion}
+  </p>
+</div>
+
+<div className="rounded-lg bg-slate-50 p-4">
+  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+    Generated At
+  </p>
+
+  <p className="mt-1 text-sm font-semibold text-slate-900">
+    {new Date(email.audit.generatedAt).toLocaleString()}
+  </p>
+</div>
           <div className="rounded-lg bg-slate-50 p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
               Confidence
@@ -227,9 +330,21 @@ function EmailDetail({
 
       {/* Draft Response */}
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
-          Draft Response
-        </h2>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+  <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+    Draft Response
+  </h2>
+
+  {hasUnsavedChanges && (
+    <span
+      className="w-fit rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
+      role="status"
+      aria-live="polite"
+    >
+      Unsaved changes
+    </span>
+  )}
+</div>
 
         {!isEditing && (
           <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -245,6 +360,7 @@ function EmailDetail({
         onApprove={onApprove}
         onReject={onReject}
         onEscalate={onEscalate}
+        onRetry={onRetry}
         onEdit={() => setIsEditing(true)}
         isEditing={isEditing}
         draftResponse={draftResponse}
@@ -260,6 +376,61 @@ function EmailDetail({
         allowedActions={email.allowedActions}
         status={email.status}
       />
+  {/* Unsaved Changes Modal */}
+{navigationAction && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4"
+    onClick={() => setNavigationAction(null)}
+  >
+    <div
+      className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-semibold text-slate-900">
+        Unsaved changes
+      </h2>
+
+      <p className="mt-2 text-sm leading-6 text-slate-500">
+        You have unsaved changes to this draft. Leave without saving?
+      </p>
+
+      <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          onClick={() => setNavigationAction(null)}
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:w-auto"
+        >
+          Stay
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            const action = navigationAction;
+
+            setNavigationAction(null);
+
+            if (action === "back") {
+              onBack();
+            }
+
+            if (action === "previous") {
+              onPrevious();
+            }
+
+            if (action === "next") {
+              onNext();
+            }
+          }}
+          className="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 sm:w-auto"
+        >
+          Leave
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
