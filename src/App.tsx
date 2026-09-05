@@ -34,29 +34,29 @@ function App() {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [riskFilter, setRiskFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-
+  
   useEffect(() => {
-    if (emails.length > 0) {
-      return;
-    }
+  if (emails.length > 0) {
+    return;
+  }
 
-    fetch("/mock-data/emails.json")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to load emails");
-        }
+  fetch("/mock-data/emails.json")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to load emails");
+      }
 
-        return response.json();
-      })
-      .then((data) => {
-        setEmails(data.emails as Email[]);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Unable to load emails.");
-        setLoading(false);
-      });
-  }, [emails.length]);
+      return response.json();
+    })
+    .then((data) => {
+      setEmails(data.emails as Email[]);
+      setLoading(false);
+    })
+    .catch(() => {
+      setError("Unable to load emails.");
+      setLoading(false);
+    });
+}, [emails.length]);
 
   useEffect(() => {
     if (emails.length > 0) {
@@ -228,7 +228,27 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
 
     setSelectedEmail(updatedEmail);
   };
+  const handleRetryLoad = () => {
+  setError("");
+  setLoading(true);
 
+  fetch("/mock-data/emails.json")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to load emails");
+      }
+
+      return response.json();
+    })
+    .then((data) => {
+      setEmails(data.emails as Email[]);
+      setLoading(false);
+    })
+    .catch(() => {
+      setError("Unable to load emails.");
+      setLoading(false);
+    });
+};
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
@@ -244,20 +264,28 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
   }
 
   if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <div className="w-full max-w-md rounded-xl border border-red-200 bg-white p-6 text-center shadow-sm">
-          <h1 className="text-lg font-semibold text-red-600">
-            {error}
-          </h1>
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-md rounded-xl border border-red-200 bg-white p-6 text-center shadow-sm">
+        <h1 className="text-lg font-semibold text-red-600">
+          {error}
+        </h1>
 
-          <p className="mt-2 text-sm text-slate-500">
-            Please refresh the page and try again.
-          </p>
-        </div>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          We couldn't load the email queue. Please try again.
+        </p>
+
+        <button
+          type="button"
+          onClick={handleRetryLoad}
+          className="mt-5 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+        >
+          Try Again
+        </button>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   // Email detail page
   if (selectedEmail) {
