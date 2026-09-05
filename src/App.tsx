@@ -1,11 +1,21 @@
 import { useEffect, useState } from "react";
 import type { Email } from "./types/email";
-import "./App.css";
+import Header from "./components/Header";
+import Filters from "./components/Filters";
+import EmailList from "./components/EmailList";
+import EmailDetail from "./components/EmailDetail";
 
 function App() {
   const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [selectedEmail, setSelectedEmail] =
+    useState<Email | null>(null);
+
+  const [search, setSearch] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [riskFilter, setRiskFilter] = useState("all");
 
   useEffect(() => {
     fetch("/mock-data/emails.json")
@@ -26,73 +36,103 @@ function App() {
       });
   }, []);
 
+  const filteredEmails = emails.filter((email) => {
+    const searchText = search.toLowerCase();
+
+    const matchesSearch =
+      email.subject.toLowerCase().includes(searchText) ||
+      email.sender.name.toLowerCase().includes(searchText) ||
+      email.sender.email.toLowerCase().includes(searchText);
+
+    const matchesPriority =
+      priorityFilter === "all" ||
+      email.priority === priorityFilter;
+
+    const matchesRisk =
+      riskFilter === "all" ||
+      email.aiAnalysis.riskLevel === riskFilter;
+
+    return (
+      matchesSearch &&
+      matchesPriority &&
+      matchesRisk
+    );
+  });
+
+  const clearFilters = () => {
+    setSearch("");
+    setPriorityFilter("all");
+    setRiskFilter("all");
+  };
+
   if (loading) {
-    return <h1>Loading emails...</h1>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800" />
+
+          <h1 className="text-lg font-semibold text-slate-800">
+            Loading emails...
+          </h1>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <h1>{error}</h1>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <div className="w-full max-w-md rounded-xl border border-red-200 bg-white p-6 text-center shadow-sm">
+          <h1 className="text-lg font-semibold text-red-600">
+            {error}
+          </h1>
+
+          <p className="mt-2 text-sm text-slate-500">
+            Please refresh the page and try again.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (selectedEmail) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+          <EmailDetail
+            email={selectedEmail}
+            onBack={() => setSelectedEmail(null)}
+          />
+        </main>
+      </div>
+    );
   }
 
   return (
-  
-  <div className="app">
-    <header className="header">
-      <h1>Clerwell Email Approval</h1>
-      <p>Human Approval Queue</p>
-    </header>
+    <div className="min-h-screen bg-slate-50">
+      <Header
+        emailCount={filteredEmails.length}
+        totalEmails={emails.length}
+      />
 
-    <main className="email-list">
-      {emails.map((email) => (
-        <div className="email-card" key={email.id}>
-          
-          <div className="email-number">
-            #{email.queuePosition}
-          </div>
+      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <Filters
+          search={search}
+          priorityFilter={priorityFilter}
+          riskFilter={riskFilter}
+          setSearch={setSearch}
+          setPriorityFilter={setPriorityFilter}
+          setRiskFilter={setRiskFilter}
+          clearFilters={clearFilters}
+        />
 
-          <div className="email-content">
-            <div className="email-top">
-              <h3>{email.subject}</h3>
-
-              <span className={`priority ${email.priority}`}>
-                {email.priority}
-              </span>
-            </div>
-
-            <p className="sender">
-              {email.sender.name} · {email.sender.email}
-            </p>
-
-            <div className="email-info">
-              <span>
-                Risk: {email.aiAnalysis.riskLevel}
-              </span>
-
-              <span>
-                Confidence:{" "}
-                {Math.round(email.aiAnalysis.confidence * 100)}%
-              </span>
-
-              <span>
-                Status: {email.status}
-              </span>
-            </div>
-
-            <div className="labels">
-              {email.labels.map((label) => (
-                <span key={label} className="label">
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      ))}
-    </main>
-  </div>
-);
-  
+        <EmailList
+          emails={filteredEmails}
+          onSelectEmail={setSelectedEmail}
+        />
+      </main>
+    </div>
+  );
 }
 
 export default App;
