@@ -7,6 +7,7 @@ type EmailDetailProps = {
   onBack: () => void;
   onApprove: () => void;
   onReject: () => void;
+  onEscalate: () => void;
   onSaveDraft: (draft: string) => void;
 };
 
@@ -15,6 +16,7 @@ function EmailDetail({
   onBack,
   onApprove,
   onReject,
+    onEscalate,
   onSaveDraft,
 }: EmailDetailProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -38,6 +40,31 @@ function EmailDetail({
     priorityStyles[
       email.priority as keyof typeof priorityStyles
     ] ?? priorityStyles.normal;
+
+  const statusStyles = {
+    pending_review:
+      "bg-amber-100 text-amber-700 border border-amber-200",
+    approved:
+      "bg-emerald-100 text-emerald-700 border border-emerald-200",
+    rejected:
+      "bg-red-100 text-red-700 border border-red-200",
+  };
+
+  const statusLabels = {
+    pending_review: "Pending Review",
+    approved: "Approved",
+    rejected: "Rejected",
+  };
+
+  const statusClass =
+    statusStyles[
+      email.status as keyof typeof statusStyles
+    ] ?? "bg-slate-100 text-slate-700 border border-slate-200";
+
+  const statusLabel =
+    statusLabels[
+      email.status as keyof typeof statusLabels
+    ] ?? email.status;
 
   return (
     <div className="space-y-6">
@@ -65,11 +92,21 @@ function EmailDetail({
             </p>
           </div>
 
-          <span
-            className={`w-fit shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${priorityClass}`}
-          >
-            {email.priority}
-          </span>
+          <div className="flex flex-wrap gap-2">
+            {/* Status */}
+            <span
+              className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold tracking-wide ${statusClass}`}
+            >
+              {statusLabel}
+            </span>
+
+            {/* Priority */}
+            <span
+              className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${priorityClass}`}
+            >
+              {email.priority}
+            </span>
+          </div>
         </div>
       </section>
 
@@ -207,11 +244,11 @@ function EmailDetail({
       <ApprovalActions
         onApprove={onApprove}
         onReject={onReject}
+        onEscalate={onEscalate}
         onEdit={() => setIsEditing(true)}
         isEditing={isEditing}
         draftResponse={draftResponse}
         onDraftChange={setDraftResponse}
-        
         onSave={() => {
           onSaveDraft(draftResponse);
           setIsEditing(false);
@@ -221,6 +258,7 @@ function EmailDetail({
           setIsEditing(false);
         }}
         allowedActions={email.allowedActions}
+        status={email.status}
       />
     </div>
   );

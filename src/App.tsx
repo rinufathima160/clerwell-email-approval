@@ -4,10 +4,23 @@ import Header from "./components/Header";
 import Filters from "./components/Filters";
 import EmailList from "./components/EmailList";
 import EmailDetail from "./components/EmailDetail";
+function getSavedEmails(): Email[] {
+  const savedEmails = localStorage.getItem("approvalQueueEmails");
 
+  if (!savedEmails) {
+    return [];
+  }
+
+  try {
+    return JSON.parse(savedEmails) as Email[];
+  } catch {
+    localStorage.removeItem("approvalQueueEmails");
+    return [];
+  }
+}
 function App() {
-  const [emails, setEmails] = useState<Email[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [emails, setEmails] = useState<Email[]>(getSavedEmails);
+const [loading, setLoading] = useState(() => getSavedEmails().length === 0);
   const [error, setError] = useState("");
 
   const [selectedEmail, setSelectedEmail] =
@@ -18,17 +31,8 @@ function App() {
   const [riskFilter, setRiskFilter] = useState("all");
 const [statusFilter, setStatusFilter] = useState("all");
   useEffect(() => {
-  const savedEmails = localStorage.getItem("approvalQueueEmails");
-
-  if (savedEmails) {
-    try {
-      const parsedEmails: Email[] = JSON.parse(savedEmails);
-      setEmails(parsedEmails);
-      setLoading(false);
-      return;
-    } catch {
-      localStorage.removeItem("approvalQueueEmails");
-    }
+  if (emails.length > 0) {
+    return;
   }
 
   fetch("/mock-data/emails.json")
@@ -40,14 +44,14 @@ const [statusFilter, setStatusFilter] = useState("all");
       return response.json();
     })
     .then((data) => {
-      setEmails(data.emails);
+      setEmails(data.emails as Email[]);
       setLoading(false);
     })
     .catch(() => {
       setError("Unable to load emails.");
       setLoading(false);
     });
-}, []);
+}, [emails.length]);
 
 useEffect(() => {
   if (emails.length > 0) {
@@ -129,6 +133,26 @@ const handleReject = () => {
   setSelectedEmail(null);
 };
 
+// Escalate email
+const handleEscalate = () => {
+  if (!selectedEmail) return;
+
+  const updatedEmail = {
+    ...selectedEmail,
+    status: "escalated",
+  };
+
+  setEmails((currentEmails) =>
+    currentEmails.map((email) =>
+      email.id === updatedEmail.id
+        ? updatedEmail
+        : email
+    )
+  );
+
+  setSelectedEmail(null);
+};
+
   // Save edited response
   const handleSaveDraft = (draft: string) => {
     if (!selectedEmail) return;
@@ -189,6 +213,7 @@ const handleReject = () => {
             onBack={() => setSelectedEmail(null)}
             onApprove={handleApprove}
             onReject={handleReject}
+            onEscalate={handleEscalate}
             onSaveDraft={handleSaveDraft}
           />
         </main>

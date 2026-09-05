@@ -73,6 +73,7 @@ function Filters({
           <option value="pending_review">Pending</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
+          <option value="escalated">Escalated</option>
         </select>
 
         {/* Clear */}

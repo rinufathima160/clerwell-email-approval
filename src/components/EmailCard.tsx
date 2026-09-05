@@ -20,10 +20,35 @@ function EmailCard({
       "bg-blue-50 text-blue-700 border-blue-200",
   };
 
+  const statusStyles = {
+    pending_review:
+      "bg-amber-50 text-amber-700 border-amber-200",
+    approved:
+      "bg-emerald-50 text-emerald-700 border-emerald-200",
+    rejected:
+      "bg-red-50 text-red-700 border-red-200",
+  };
+
+  const statusLabels = {
+    pending_review: "Pending Review",
+    approved: "Approved",
+    rejected: "Rejected",
+  };
+
   const priorityClass =
     priorityStyles[
       email.priority as keyof typeof priorityStyles
     ] ?? priorityStyles.normal;
+
+  const statusClass =
+    statusStyles[
+      email.status as keyof typeof statusStyles
+    ] ?? "bg-slate-50 text-slate-700 border-slate-200";
+
+  const statusLabel =
+    statusLabels[
+      email.status as keyof typeof statusLabels
+    ] ?? email.status;
 
   return (
     <button
@@ -58,7 +83,7 @@ function EmailCard({
         {/* Email content */}
         <div className="min-w-0 flex-1">
 
-          {/* Subject + Priority */}
+          {/* Subject + Status + Priority */}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
 
             <h3
@@ -76,26 +101,57 @@ function EmailCard({
               {email.subject}
             </h3>
 
-            <span
-              className={`
-                w-fit
-                shrink-0
-                rounded-full
-                border
-                px-2.5
-                py-1
-                text-[11px]
-                font-semibold
-                uppercase
-                tracking-wide
-                sm:px-3
-                sm:text-xs
-                ${priorityClass}
-              `}
-            >
-              {email.priority}
-            </span>
+            <div className="flex flex-wrap gap-2">
 
+              {/* Status */}
+              <span
+                className="
+                  w-fit
+                  shrink-0
+                  rounded-full
+                  border
+                  px-2.5
+                  py-1
+                  text-[11px]
+                  font-semibold
+                  tracking-wide
+                  sm:px-3
+                  sm:text-xs
+                "
+                style={{}}
+              >
+                <span
+                  className={`
+                    rounded-full
+                    ${statusClass}
+                  `}
+                >
+                  {statusLabel}
+                </span>
+              </span>
+
+              {/* Priority */}
+              <span
+                className={`
+                  w-fit
+                  shrink-0
+                  rounded-full
+                  border
+                  px-2.5
+                  py-1
+                  text-[11px]
+                  font-semibold
+                  uppercase
+                  tracking-wide
+                  sm:px-3
+                  sm:text-xs
+                  ${priorityClass}
+                `}
+              >
+                {email.priority}
+              </span>
+
+            </div>
           </div>
 
           {/* Sender */}
@@ -134,13 +190,6 @@ function EmailCard({
                 email.aiAnalysis.confidence * 100
               )}
               %
-            </span>
-
-            <span>
-              <span className="font-medium text-slate-800">
-                Status:
-              </span>{" "}
-              {email.status}
             </span>
           </div>
 
