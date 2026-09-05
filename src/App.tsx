@@ -93,45 +93,41 @@ useEffect(() => {
   setStatusFilter("all");
 };
 
-  // Approve email
-  const handleApprove = () => {
-    if (!selectedEmail) return;
+// Approve email
+const handleApprove = () => {
+  if (!selectedEmail) return;
 
-    const updatedEmail = {
-      ...selectedEmail,
-      status: "approved",
-    };
-
-    setEmails((currentEmails) =>
-      currentEmails.map((email) =>
-        email.id === updatedEmail.id
-          ? updatedEmail
-          : email
-      )
-    );
-
-    setSelectedEmail(updatedEmail);
+  const updatedEmail = {
+    ...selectedEmail,
+    status: "approved",
   };
 
-  // Reject email
-  const handleReject = () => {
-    if (!selectedEmail) return;
+  setEmails((currentEmails) =>
+    currentEmails.map((email) =>
+      email.id === updatedEmail.id ? updatedEmail : email
+    )
+  );
 
-    const updatedEmail = {
-      ...selectedEmail,
-      status: "rejected",
-    };
+  setSelectedEmail(null);
+};
 
-    setEmails((currentEmails) =>
-      currentEmails.map((email) =>
-        email.id === updatedEmail.id
-          ? updatedEmail
-          : email
-      )
-    );
+// Reject email
+const handleReject = () => {
+  if (!selectedEmail) return;
 
-    setSelectedEmail(updatedEmail);
+  const updatedEmail = {
+    ...selectedEmail,
+    status: "rejected",
   };
+
+  setEmails((currentEmails) =>
+    currentEmails.map((email) =>
+      email.id === updatedEmail.id ? updatedEmail : email
+    )
+  );
+
+  setSelectedEmail(null);
+};
 
   // Save edited response
   const handleSaveDraft = (draft: string) => {
