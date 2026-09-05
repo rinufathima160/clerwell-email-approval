@@ -124,22 +124,21 @@ const handleNext = () => {
 };
   // Approve email
   const handleApprove = () => {
-    if (!selectedEmail) return;
+  if (!selectedEmail) return;
 
-    const updatedEmail = {
-      ...selectedEmail,
-      status: "approved",
-    };
-
-    setEmails((currentEmails) =>
-      currentEmails.map((email) =>
-        email.id === updatedEmail.id ? updatedEmail : email
-      )
-    );
-
-    setSelectedEmail(null);
+  const updatedEmail = {
+    ...selectedEmail,
+    status: "approved",
   };
 
+  setEmails((currentEmails) =>
+    currentEmails.map((email) =>
+      email.id === updatedEmail.id ? updatedEmail : email
+    )
+  );
+
+  setSelectedEmail(updatedEmail);
+};
   // Reject email
   const handleReject = () => {
     if (!selectedEmail) return;
@@ -155,7 +154,7 @@ const handleNext = () => {
       )
     );
 
-    setSelectedEmail(null);
+   setSelectedEmail(updatedEmail);
   };
 
   // Escalate email
@@ -175,7 +174,7 @@ const handleNext = () => {
       )
     );
 
-    setSelectedEmail(null);
+   setSelectedEmail(updatedEmail);
   };
 
 

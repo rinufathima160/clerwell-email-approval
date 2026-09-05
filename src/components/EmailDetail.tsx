@@ -215,6 +215,43 @@ const handleNavigation = (
         </div>
       </section>
 
+              {/* Attachments / Evidence */}
+    
+<section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+  <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
+    Attachments / Evidence
+  </h2>
+
+  <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    {email.aiAnalysis.missingInformation.length > 0 ? (
+      <>
+        <p className="text-sm font-semibold text-amber-700">
+          Missing evidence
+        </p>
+
+        <p className="mt-1 text-sm text-slate-700">
+          The incoming email does not include all evidence needed for review.
+        </p>
+
+        <p className="mt-2 text-xs font-medium text-slate-500">
+          {email.aiAnalysis.missingInformation.length} item
+          {email.aiAnalysis.missingInformation.length !== 1 ? "s" : ""} may
+          be required.
+        </p>
+      </>
+    ) : (
+      <>
+        <p className="text-sm font-semibold text-slate-700">
+          No attachments provided
+        </p>
+
+        <p className="mt-1 text-sm text-slate-600">
+          No additional evidence is required based on the current analysis.
+        </p>
+      </>
+    )}
+  </div>
+</section>
       {/* AI Analysis */}
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">
@@ -231,15 +268,25 @@ const handleNavigation = (
               {email.aiAnalysis.intent}
             </p>
           </div>
-          <div className="rounded-lg bg-slate-50 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Policy Used
-                </p>
+<div className="rounded-lg bg-slate-50 p-4">
+  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+    Policy Used
+  </p>
 
-            <p className="mt-1 break-words text-sm font-semibold text-slate-900">
-             {email.aiAnalysis.policyId}
-                 </p>
-            </div>
+  {email.aiAnalysis.policyId ? (
+    <p className="mt-1 break-words text-sm font-semibold text-slate-900">
+      {email.aiAnalysis.policyId}
+    </p>
+  ) : (
+    <p
+      className="mt-1 text-sm font-semibold text-amber-700"
+      role="status"
+      aria-live="polite"
+    >
+      Policy context unavailable
+    </p>
+  )}
+</div>
 
             <div className="rounded-lg bg-slate-50 p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -260,15 +307,25 @@ const handleNavigation = (
     {new Date(email.audit.generatedAt).toLocaleString()}
   </p>
 </div>
-          <div className="rounded-lg bg-slate-50 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Confidence
-            </p>
+<div className="rounded-lg bg-slate-50 p-4">
+  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+    Confidence
+  </p>
 
-            <p className="mt-1 text-sm font-semibold text-slate-900">
-              {Math.round(email.aiAnalysis.confidence * 100)}%
-            </p>
-          </div>
+  <p className="mt-1 text-sm font-semibold text-slate-900">
+    {Math.round(email.aiAnalysis.confidence * 100)}%
+  </p>
+
+  {email.aiAnalysis.confidence < 0.8 && (
+    <p
+      className="mt-2 text-xs font-medium text-amber-700"
+      role="status"
+      aria-live="polite"
+    >
+      ⚠ Low confidence — manual review recommended
+    </p>
+  )}
+</div>
 
           <div className="rounded-lg bg-slate-50 p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">

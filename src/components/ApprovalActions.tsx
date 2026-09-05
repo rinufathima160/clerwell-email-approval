@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 type ApprovalActionsProps = {
-  onApprove: () => void;
-  onReject: () => void;
-  onEscalate: () => void;
+  onApprove: () => void | Promise<void>;
+onReject: () => void | Promise<void>;
+onEscalate: () => void | Promise<void>;
   onRetry: (guidance: string) => void;
   onEdit: () => void;
 
@@ -37,7 +37,11 @@ function ApprovalActions({
   const [retryOpen, setRetryOpen] = useState(false);
   const [retryGuidance, setRetryGuidance] = useState("");
   const [message, setMessage] = useState("");
+  const [actionState, setActionState] = useState<
+  "idle" | "in_progress" | "success" | "error"
+>("idle");
 
+  const [actionError, setActionError] = useState("");
   const canApprove = allowedActions.includes("approve_send");
   const canReject = allowedActions.includes("reject");
   const canEdit = allowedActions.includes("edit");
@@ -49,28 +53,43 @@ function ApprovalActions({
   const isRejected = status === "rejected";
   const isEscalated = status === "escalated";
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+  if (!confirmation) return;
+
+  setActionState("in_progress");
+  setActionError("");
+  setMessage("");
+
+  try {
     if (confirmation === "approve") {
-      onApprove();
+      await onApprove();
       setMessage("Email approved successfully.");
     }
 
     if (confirmation === "reject") {
-      onReject();
+      await onReject();
       setMessage("Email rejected successfully.");
     }
 
     if (confirmation === "escalate") {
-      onEscalate();
+      await onEscalate();
       setMessage("Email escalated successfully.");
     }
 
+    setActionState("success");
     setConfirmation(null);
 
     setTimeout(() => {
       setMessage("");
+      setActionState("idle");
     }, 3000);
-  };
+  } catch {
+    setActionState("error");
+    setActionError(
+      "The action could not be completed. Please try again."
+    );
+  }
+};
 
   const handleRetry = () => {
     const guidance = retryGuidance.trim();
@@ -170,37 +189,60 @@ function ApprovalActions({
             ✓ {message}
           </div>
         )}
+      {actionState === "in_progress" && (
+  <div
+    className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700"
+    role="status"
+    aria-live="polite"
+  >
+    Processing your decision...
+  </div>
+)}
+
+{actionState === "error" && (
+  <div
+    className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+    role="alert"
+    aria-live="assertive"
+  >
+    {actionError}
+  </div>
+)}
+
 
         {/* Actions */}
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {isPending && canApprove && (
             <button
-              type="button"
-              onClick={() => setConfirmation("approve")}
-              className="w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-            >
-              Approve
-            </button>
+  type="button"
+  onClick={() => setConfirmation("approve")}
+  disabled={actionState === "in_progress"}
+  className="w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+>
+  {actionState === "in_progress" ? "Processing..." : "Approve"}
+</button>
           )}
 
           {isPending && canReject && (
             <button
-              type="button"
-              onClick={() => setConfirmation("reject")}
-              className="w-full rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
-            >
-              Reject
-            </button>
+  type="button"
+  onClick={() => setConfirmation("reject")}
+  disabled={actionState === "in_progress"}
+  className="w-full rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-300"
+>
+  {actionState === "in_progress" ? "Processing..." : "Reject"}
+</button>
           )}
 
           {isPending && canEscalate && (
             <button
-              type="button"
-              onClick={() => setConfirmation("escalate")}
-              className="w-full rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-300"
-            >
-              Escalate
-            </button>
+  type="button"
+  onClick={() => setConfirmation("escalate")}
+  disabled={actionState === "in_progress"}
+  className="w-full rounded-lg bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-orange-300"
+>
+  {actionState === "in_progress" ? "Processing..." : "Escalate"}
+</button>
           )}
 
           {isPending && canRetry && (
