@@ -18,23 +18,46 @@ function App() {
   const [riskFilter, setRiskFilter] = useState("all");
 const [statusFilter, setStatusFilter] = useState("all");
   useEffect(() => {
-    fetch("/mock-data/emails.json")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to load emails");
-        }
+  const savedEmails = localStorage.getItem("approvalQueueEmails");
 
-        return response.json();
-      })
-      .then((data) => {
-        setEmails(data.emails);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Unable to load emails.");
-        setLoading(false);
-      });
-  }, []);
+  if (savedEmails) {
+    try {
+      const parsedEmails: Email[] = JSON.parse(savedEmails);
+      setEmails(parsedEmails);
+      setLoading(false);
+      return;
+    } catch {
+      localStorage.removeItem("approvalQueueEmails");
+    }
+  }
+
+  fetch("/mock-data/emails.json")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to load emails");
+      }
+
+      return response.json();
+    })
+    .then((data) => {
+      setEmails(data.emails);
+      setLoading(false);
+    })
+    .catch(() => {
+      setError("Unable to load emails.");
+      setLoading(false);
+    });
+}, []);
+
+useEffect(() => {
+  if (emails.length > 0) {
+    localStorage.setItem(
+      "approvalQueueEmails",
+      JSON.stringify(emails)
+    );
+  }
+}, [emails]);
+
 
   const filteredEmails = emails.filter((email) => {
     const searchText = search.toLowerCase();
