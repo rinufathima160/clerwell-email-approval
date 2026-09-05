@@ -1,0 +1,75 @@
+{
+  "version": "1.0",
+  "policies": [
+    {
+      "id": "refund-3.2",
+      "name": "Refund Policy 3.2",
+      "category": "refunds",
+      "summary": "Standard purchases may be refunded to the original payment method within 30 days when eligibility checks pass.",
+      "requiresHumanApproval": true,
+      "riskFlags": [
+        "amount_over_5000_inr",
+        "payment_method_mismatch",
+        "outside_window"
+      ]
+    },
+    {
+      "id": "billing-2.4",
+      "name": "Billing Correction Policy 2.4",
+      "category": "billing",
+      "summary": "Duplicate charges and invoice errors may be corrected after transaction and account verification.",
+      "requiresHumanApproval": true,
+      "riskFlags": [
+        "bank_details",
+        "tax_document_change"
+      ]
+    },
+    {
+      "id": "security-5.1",
+      "name": "Account Security Policy 5.1",
+      "category": "security",
+      "summary": "Suspected account compromise requires identity verification and security escalation before account changes or sensitive disclosure.",
+      "requiresHumanApproval": true,
+      "riskFlags": [
+        "credential_change",
+        "unknown_device",
+        "social_engineering"
+      ]
+    },
+    {
+      "id": "privacy-4.0",
+      "name": "Privacy Request Policy 4.0",
+      "category": "privacy",
+      "summary": "Access and deletion requests require identity verification, jurisdiction checks, retention review, and privacy-team processing.",
+      "requiresHumanApproval": true,
+      "riskFlags": [
+        "identity_unverified",
+        "legal_hold",
+        "third_party_data"
+      ]
+    },
+    {
+      "id": "support-1.8",
+      "name": "Customer Support Policy 1.8",
+      "category": "support",
+      "summary": "Support may apologise, explain status, request evidence, and offer approved service recovery without making unverified commitments.",
+      "requiresHumanApproval": false,
+      "riskFlags": [
+        "service_credit",
+        "public_escalation"
+      ]
+    },
+    {
+      "id": "legal-7.3",
+      "name": "Legal Escalation Policy 7.3",
+      "category": "legal",
+      "summary": "Threats of litigation, regulatory complaints, subpoenas, and admissions of liability must be routed to Legal without substantive response.",
+      "requiresHumanApproval": true,
+      "riskFlags": [
+        "litigation",
+        "regulator",
+        "liability_admission"
+      ]
+    }
+  ]
+}

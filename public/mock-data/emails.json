@@ -1,0 +1,746 @@
+{
+  "version": "1.1-candidate",
+  "queueName": "Human Approval Queue",
+  "emails": [
+    {
+      "id": "email-01",
+      "queuePosition": 1,
+      "status": "pending_review",
+      "priority": "normal",
+      "labels": [
+        "refund",
+        "eligible"
+      ],
+      "sender": {
+        "name": "Aisha Verma",
+        "email": "aisha.verma@example.com"
+      },
+      "subject": "Refund request for order CW-10482",
+      "receivedAt": "2026-09-01T09:12:00+05:30",
+      "thread": [
+        {
+          "from": "Aisha Verma",
+          "at": "2026-09-01T09:12:00+05:30",
+          "body": "Hello, I bought the annual Starter plan 12 days ago but it is not suitable for our team. Please cancel it and refund the payment to the same card."
+        },
+        {
+          "from": "Billing Bot",
+          "at": "2026-09-01T09:13:00+05:30",
+          "body": "Order CW-10482 verified. Purchase age: 12 days. Amount: INR 3,499. No previous refund."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "eligible_refund",
+        "confidence": 0.94,
+        "sentiment": "neutral",
+        "riskLevel": "low",
+        "policyId": "refund-3.2",
+        "recommendedAction": "approve_refund",
+        "rationale": "The purchase is within 30 days, the order is verified, and the original payment method is available.",
+        "missingInformation": []
+      },
+      "draftResponse": "Hi Aisha,\n\nThanks for contacting us. I have confirmed that order CW-10482 is eligible for a refund under our 30-day policy. We can cancel the annual Starter plan and return INR 3,499 to the original payment method. The refund should appear within 5-7 business days.\n\nRegards,\nClerwell Support",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T09:12:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-02",
+      "queuePosition": 2,
+      "status": "pending_review",
+      "priority": "normal",
+      "labels": [
+        "refund",
+        "outside-window"
+      ],
+      "sender": {
+        "name": "Rohan Mehta",
+        "email": "rohan.mehta@example.com"
+      },
+      "subject": "Please refund subscription from June",
+      "receivedAt": "2026-09-01T09:24:00+05:30",
+      "thread": [
+        {
+          "from": "Rohan Mehta",
+          "at": "2026-09-01T09:24:00+05:30",
+          "body": "I forgot to cancel after our project ended. I have not used the account since June. Can you refund the last three months?"
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "refund_outside_window",
+        "confidence": 0.78,
+        "sentiment": "disappointed",
+        "riskLevel": "medium",
+        "policyId": "refund-3.2",
+        "recommendedAction": "request_exception_review",
+        "rationale": "The request is outside the standard window and covers multiple billing cycles. Usage data is not included.",
+        "missingInformation": [
+          "account usage history",
+          "reason for exception"
+        ]
+      },
+      "draftResponse": "Hi Rohan,\n\nI am sorry this subscription continued after your project ended. The request falls outside our standard refund window, so I cannot confirm a refund yet. I have sent the account for an exception review and we will update you after checking the billing and usage history.\n\nRegards,\nClerwell Support",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T09:24:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-03",
+      "queuePosition": 3,
+      "status": "pending_review",
+      "priority": "urgent",
+      "labels": [
+        "billing",
+        "duplicate-charge"
+      ],
+      "sender": {
+        "name": "Neha Rao",
+        "email": "neha.rao@example.com"
+      },
+      "subject": "Charged twice for invoice INV-8821",
+      "receivedAt": "2026-09-01T09:41:00+05:30",
+      "thread": [
+        {
+          "from": "Neha Rao",
+          "at": "2026-09-01T09:41:00+05:30",
+          "body": "Our card shows two INR 12,000 charges for invoice INV-8821. Please reverse one today."
+        },
+        {
+          "from": "Payments Service",
+          "at": "2026-09-01T09:42:00+05:30",
+          "body": "Two captured transactions found. Transaction IDs TX-77102 and TX-77119. Same card token and amount."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "duplicate_charge",
+        "confidence": 0.98,
+        "sentiment": "frustrated",
+        "riskLevel": "medium",
+        "policyId": "billing-2.4",
+        "recommendedAction": "reverse_duplicate",
+        "rationale": "Two captured transactions match the same invoice, amount, and card token.",
+        "missingInformation": []
+      },
+      "draftResponse": "Hi Neha,\n\nYou are right - we found two completed charges for invoice INV-8821. We will reverse the duplicate INR 12,000 transaction to the original card. You will receive a confirmation when the reversal is submitted.\n\nRegards,\nClerwell Billing",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T09:41:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-04",
+      "queuePosition": 4,
+      "status": "pending_review",
+      "priority": "critical",
+      "labels": [
+        "security",
+        "account-takeover"
+      ],
+      "sender": {
+        "name": "Daniel Wong",
+        "email": "daniel.wong@example.com"
+      },
+      "subject": "URGENT: Someone changed our admin email",
+      "receivedAt": "2026-09-01T09:57:00+05:30",
+      "thread": [
+        {
+          "from": "Daniel Wong",
+          "at": "2026-09-01T09:57:00+05:30",
+          "body": "I received a notice that our admin email was changed. I did not do this and cannot log in. Change it back to daniel.wong@example.com immediately."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "suspected_account_takeover",
+        "confidence": 0.71,
+        "sentiment": "alarmed",
+        "riskLevel": "critical",
+        "policyId": "security-5.1",
+        "recommendedAction": "security_escalation",
+        "rationale": "The message indicates unauthorised credential changes, but the sender's identity and account ownership are not verified.",
+        "missingInformation": [
+          "verified account ownership",
+          "security event log",
+          "safe callback channel"
+        ]
+      },
+      "draftResponse": "Hi Daniel,\n\nWe are treating this as a potential account security incident. For your protection, we cannot change administrator details from an unverified email request. Our security team will begin identity verification through a trusted channel. Please do not share passwords or one-time codes by email.\n\nRegards,\nClerwell Security",
+      "allowedActions": [
+        "edit",
+        "reject",
+        "retry",
+        "escalate"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T09:57:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-05",
+      "queuePosition": 5,
+      "status": "pending_review",
+      "priority": "urgent",
+      "labels": [
+        "cancellation",
+        "enterprise"
+      ],
+      "sender": {
+        "name": "Priya Nair",
+        "email": "priya.nair@example.com"
+      },
+      "subject": "Cancel our Enterprise renewal",
+      "receivedAt": "2026-09-01T10:08:00+05:30",
+      "thread": [
+        {
+          "from": "Priya Nair",
+          "at": "2026-09-01T10:08:00+05:30",
+          "body": "Please cancel the renewal for our Enterprise workspace before it charges tomorrow. I am the operations manager."
+        },
+        {
+          "from": "Account System",
+          "at": "2026-09-01T10:09:00+05:30",
+          "body": "Workspace: Northwind India. Renewal: INR 8,40,000. Sender is not listed as billing owner."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "enterprise_cancellation",
+        "confidence": 0.91,
+        "sentiment": "urgent",
+        "riskLevel": "high",
+        "policyId": "billing-2.4",
+        "recommendedAction": "verify_authority",
+        "rationale": "The renewal is imminent and high value, but the sender is not an authorised billing owner.",
+        "missingInformation": [
+          "billing-owner approval"
+        ]
+      },
+      "draftResponse": "Hi Priya,\n\nWe received your request regarding the Northwind India renewal. Because this is an Enterprise billing change, we need confirmation from an authorised billing owner before cancelling. We have flagged the renewal for urgent review and will contact the registered billing owner.\n\nRegards,\nClerwell Accounts",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry",
+        "escalate"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T10:08:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-06",
+      "queuePosition": 6,
+      "status": "pending_review",
+      "priority": "normal",
+      "labels": [
+        "billing",
+        "invoice",
+        "gst"
+      ],
+      "sender": {
+        "name": "Arjun Iyer",
+        "email": "arjun.iyer@example.com"
+      },
+      "subject": "GST number missing on invoice",
+      "receivedAt": "2026-09-01T10:22:00+05:30",
+      "thread": [
+        {
+          "from": "Arjun Iyer",
+          "at": "2026-09-01T10:22:00+05:30",
+          "body": "Invoice INV-8890 does not show our GSTIN 29ABCDE1234F1Z5. Please reissue it with the number and legal name from our account."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "invoice_correction",
+        "confidence": 0.93,
+        "sentiment": "neutral",
+        "riskLevel": "medium",
+        "policyId": "billing-2.4",
+        "recommendedAction": "reissue_invoice",
+        "rationale": "The requested tax fields match the verified organisation profile, but tax-document changes require review.",
+        "missingInformation": []
+      },
+      "draftResponse": "Hi Arjun,\n\nThanks for flagging this. The GSTIN and legal name in your message match the verified billing profile. We can reissue invoice INV-8890 with those details and will send the corrected copy once generated.\n\nRegards,\nClerwell Billing",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T10:22:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-07",
+      "queuePosition": 7,
+      "status": "pending_review",
+      "priority": "urgent",
+      "labels": [
+        "shipping",
+        "delay"
+      ],
+      "sender": {
+        "name": "Maya Shah",
+        "email": "maya.shah@example.com"
+      },
+      "subject": "Shipment has not moved in six days",
+      "receivedAt": "2026-09-01T10:37:00+05:30",
+      "thread": [
+        {
+          "from": "Maya Shah",
+          "at": "2026-09-01T10:37:00+05:30",
+          "body": "Tracking has shown 'label created' for six days. This is for an event on Friday. Where is it?"
+        },
+        {
+          "from": "Fulfilment Service",
+          "at": "2026-09-01T10:38:00+05:30",
+          "body": "Order CW-10520 packed. Carrier acceptance scan missing. Replacement stock available."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "shipment_delay",
+        "confidence": 0.89,
+        "sentiment": "frustrated",
+        "riskLevel": "medium",
+        "policyId": "support-1.8",
+        "recommendedAction": "offer_replacement",
+        "rationale": "The carrier has not accepted the parcel and replacement inventory is available, but delivery before Friday cannot be guaranteed.",
+        "missingInformation": []
+      },
+      "draftResponse": "Hi Maya,\n\nI am sorry the shipment has not progressed. The parcel is packed, but the carrier acceptance scan is missing. We can dispatch a replacement at no cost today; however, I do not want to promise Friday delivery until the carrier confirms pickup. Please let us know if the replacement is your preferred option.\n\nRegards,\nClerwell Support",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T10:37:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-08",
+      "queuePosition": 8,
+      "status": "pending_review",
+      "priority": "normal",
+      "labels": [
+        "damage",
+        "evidence-required"
+      ],
+      "sender": {
+        "name": "Kabir Singh",
+        "email": "kabir.singh@example.com"
+      },
+      "subject": "Device arrived with cracked screen",
+      "receivedAt": "2026-09-01T10:54:00+05:30",
+      "thread": [
+        {
+          "from": "Kabir Singh",
+          "at": "2026-09-01T10:54:00+05:30",
+          "body": "The device arrived today with a cracked screen. I want a replacement immediately."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "damaged_delivery",
+        "confidence": 0.86,
+        "sentiment": "upset",
+        "riskLevel": "medium",
+        "policyId": "support-1.8",
+        "recommendedAction": "request_evidence",
+        "rationale": "A replacement is likely appropriate, but the required photos and packaging details are missing.",
+        "missingInformation": [
+          "photos of damage",
+          "serial number",
+          "packaging condition"
+        ]
+      },
+      "draftResponse": "Hi Kabir,\n\nI am sorry the device arrived damaged. We can review a replacement right away. Please reply with a clear photo of the damaged screen, the serial number, and a photo of the outer packaging. Once received, we will confirm the next step.\n\nRegards,\nClerwell Support",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T10:54:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-09",
+      "queuePosition": 9,
+      "status": "pending_review",
+      "priority": "low",
+      "labels": [
+        "feedback",
+        "feature-request"
+      ],
+      "sender": {
+        "name": "Sara Kim",
+        "email": "sara.kim@example.com"
+      },
+      "subject": "Please add dark mode to the admin portal",
+      "receivedAt": "2026-09-01T11:06:00+05:30",
+      "thread": [
+        {
+          "from": "Sara Kim",
+          "at": "2026-09-01T11:06:00+05:30",
+          "body": "Our support team works late shifts. Please add dark mode to the admin portal. The current screen is uncomfortable at night."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "feature_request",
+        "confidence": 0.97,
+        "sentiment": "constructive",
+        "riskLevel": "low",
+        "policyId": "support-1.8",
+        "recommendedAction": "acknowledge_feedback",
+        "rationale": "The customer is offering product feedback and does not require an account action.",
+        "missingInformation": []
+      },
+      "draftResponse": "Hi Sara,\n\nThank you for explaining why dark mode would help your late-shift team. I have recorded the request for our product team, including the accessibility and comfort context. We cannot promise a release date, but your feedback will be considered during planning.\n\nRegards,\nClerwell Support",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T11:06:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-10",
+      "queuePosition": 10,
+      "status": "pending_review",
+      "priority": "urgent",
+      "labels": [
+        "privacy",
+        "deletion-request"
+      ],
+      "sender": {
+        "name": "Oliver Grant",
+        "email": "oliver.grant@example.com"
+      },
+      "subject": "Delete every record you have about me",
+      "receivedAt": "2026-09-01T11:18:00+05:30",
+      "thread": [
+        {
+          "from": "Oliver Grant",
+          "at": "2026-09-01T11:18:00+05:30",
+          "body": "I am requesting deletion of every record you hold about me, including support tickets and billing records. Confirm when this is done."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "data_deletion_request",
+        "confidence": 0.96,
+        "sentiment": "firm",
+        "riskLevel": "high",
+        "policyId": "privacy-4.0",
+        "recommendedAction": "privacy_intake",
+        "rationale": "This is a formal deletion request, but identity, jurisdiction, retention exceptions, and third-party data scope must be checked.",
+        "missingInformation": [
+          "identity verification",
+          "jurisdiction",
+          "retention/legal-hold status"
+        ]
+      },
+      "draftResponse": "Hi Oliver,\n\nWe have received your data deletion request. Before processing it, our privacy team must verify your identity and review any records that must be retained for legal or financial obligations. We will contact you through a verified channel with the next steps and applicable timeline.\n\nRegards,\nClerwell Privacy Team",
+      "allowedActions": [
+        "edit",
+        "reject",
+        "retry",
+        "escalate"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T11:18:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-11",
+      "queuePosition": 11,
+      "status": "pending_review",
+      "priority": "critical",
+      "labels": [
+        "security",
+        "social-engineering"
+      ],
+      "sender": {
+        "name": "IT Helpdesk",
+        "email": "helpdesk@vendor-example.com"
+      },
+      "subject": "Reset CFO account and send temporary password",
+      "receivedAt": "2026-09-01T11:31:00+05:30",
+      "thread": [
+        {
+          "from": "IT Helpdesk",
+          "at": "2026-09-01T11:31:00+05:30",
+          "body": "We support your client Apex Labs. Their CFO is locked out before a board meeting. Reset the account and email the temporary password to us immediately."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "third_party_password_reset",
+        "confidence": 0.83,
+        "sentiment": "urgent",
+        "riskLevel": "critical",
+        "policyId": "security-5.1",
+        "recommendedAction": "deny_and_escalate",
+        "rationale": "A third party is requesting credentials for a privileged user through an unverified email channel.",
+        "missingInformation": [
+          "verified support relationship",
+          "user identity",
+          "approved recovery channel"
+        ]
+      },
+      "draftResponse": "Hello,\n\nFor security, we cannot reset a privileged account or send credentials in response to an unverified third-party email. The account owner must use the approved recovery process or contact us through a verified support channel. We have flagged this request for security review.\n\nRegards,\nClerwell Security",
+      "allowedActions": [
+        "edit",
+        "reject",
+        "retry",
+        "escalate"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T11:31:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-12",
+      "queuePosition": 12,
+      "status": "pending_review",
+      "priority": "normal",
+      "labels": [
+        "complaint",
+        "tone-sensitive"
+      ],
+      "sender": {
+        "name": "Liam Brooks",
+        "email": "liam.brooks@example.com"
+      },
+      "subject": "Your service is useless",
+      "receivedAt": "2026-09-01T11:47:00+05:30",
+      "thread": [
+        {
+          "from": "Liam Brooks",
+          "at": "2026-09-01T11:47:00+05:30",
+          "body": "Your service is useless. I have explained this bug three times and nobody reads the ticket. Fix it or I will cancel."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "repeated_support_complaint",
+        "confidence": 0.88,
+        "sentiment": "angry",
+        "riskLevel": "medium",
+        "policyId": "support-1.8",
+        "recommendedAction": "acknowledge_and_escalate",
+        "rationale": "The customer reports repeated failure and possible churn. The actual bug and previous ticket context are missing.",
+        "missingInformation": [
+          "previous ticket history",
+          "bug details",
+          "current impact"
+        ]
+      },
+      "draftResponse": "Hi Liam,\n\nYou are right to be frustrated after explaining the issue multiple times. I am sorry we have made you repeat yourself. I am reviewing the earlier tickets and escalating the unresolved bug so the next response addresses the history rather than starting over. We will update you with a clear owner and next step.\n\nRegards,\nClerwell Support",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry",
+        "escalate"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T11:47:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-13",
+      "queuePosition": 13,
+      "status": "pending_review",
+      "priority": "critical",
+      "labels": [
+        "legal",
+        "litigation-threat"
+      ],
+      "sender": {
+        "name": "Meera Joshi",
+        "email": "meera.joshi@example.com"
+      },
+      "subject": "Notice before legal action",
+      "receivedAt": "2026-09-01T12:03:00+05:30",
+      "thread": [
+        {
+          "from": "Meera Joshi",
+          "at": "2026-09-01T12:03:00+05:30",
+          "body": "Your system exposed confidential project names to another customer. Unless you provide a full explanation and compensation within 24 hours, our lawyers will proceed."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "legal_threat_data_exposure",
+        "confidence": 0.95,
+        "sentiment": "angry",
+        "riskLevel": "critical",
+        "policyId": "legal-7.3",
+        "recommendedAction": "legal_and_security_escalation",
+        "rationale": "The email alleges a data exposure and threatens legal action. A substantive response could create legal or incident-response risk.",
+        "missingInformation": [
+          "incident verification",
+          "affected records",
+          "legal review"
+        ]
+      },
+      "draftResponse": "Hi Meera,\n\nWe have received your message and take the allegation seriously. We have escalated it for urgent review by our security and legal teams. We will preserve the relevant records and contact you through the appropriate channel after the initial assessment.\n\nRegards,\nClerwell Response Team",
+      "allowedActions": [
+        "edit",
+        "reject",
+        "retry",
+        "escalate"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T12:03:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-14",
+      "queuePosition": 14,
+      "status": "pending_review",
+      "priority": "critical",
+      "labels": [
+        "outage",
+        "enterprise",
+        "vip"
+      ],
+      "sender": {
+        "name": "Elena Petrova",
+        "email": "elena.petrova@example.com"
+      },
+      "subject": "Production API failing across all regions",
+      "receivedAt": "2026-09-01T12:16:00+05:30",
+      "thread": [
+        {
+          "from": "Elena Petrova",
+          "at": "2026-09-01T12:16:00+05:30",
+          "body": "All API calls are returning 503 in three regions. This is blocking checkout for our stores. Confirm whether you have an outage and give us an ETA."
+        },
+        {
+          "from": "Status Monitor",
+          "at": "2026-09-01T12:17:00+05:30",
+          "body": "Elevated 5xx errors detected. Incident INC-204 opened. Root cause and recovery time unknown."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "service_outage",
+        "confidence": 0.99,
+        "sentiment": "urgent",
+        "riskLevel": "high",
+        "policyId": "support-1.8",
+        "recommendedAction": "incident_acknowledgement",
+        "rationale": "Monitoring confirms elevated errors and an incident, but there is no verified root cause or ETA.",
+        "missingInformation": []
+      },
+      "draftResponse": "Hi Elena,\n\nWe are investigating elevated API errors affecting multiple regions under incident INC-204. We understand this is blocking checkout. We do not yet have a verified recovery estimate, and we will share the next confirmed update through the status channel as soon as it is available.\n\nRegards,\nClerwell Incident Response",
+      "allowedActions": [
+        "approve_send",
+        "edit",
+        "reject",
+        "retry",
+        "escalate"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T12:16:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    },
+    {
+      "id": "email-15",
+      "queuePosition": 15,
+      "status": "pending_review",
+      "priority": "urgent",
+      "labels": [
+        "refund",
+        "payment-mismatch",
+        "fraud-risk"
+      ],
+      "sender": {
+        "name": "Sanjay Kulkarni",
+        "email": "sanjay.kulkarni@example.com"
+      },
+      "subject": "Refund to my new bank account",
+      "receivedAt": "2026-09-01T12:32:00+05:30",
+      "thread": [
+        {
+          "from": "Sanjay Kulkarni",
+          "at": "2026-09-01T12:32:00+05:30",
+          "body": "Approve my INR 74,000 refund but do not send it to the old card. Transfer it to the bank account in the attached document because that card is closed."
+        }
+      ],
+      "aiAnalysis": {
+        "intent": "refund_payment_method_change",
+        "confidence": 0.92,
+        "sentiment": "urgent",
+        "riskLevel": "critical",
+        "policyId": "refund-3.2",
+        "recommendedAction": "verify_and_escalate",
+        "rationale": "The refund amount is high and the customer requests a different payment destination using emailed bank details.",
+        "missingInformation": [
+          "verified identity",
+          "original transaction",
+          "approved alternative-refund process",
+          "attachment malware scan"
+        ]
+      },
+      "draftResponse": "Hi Sanjay,\n\nWe received your refund request. For security, we cannot redirect a refund to bank details provided by email. Refunds normally return to the original payment method. If that method is closed, our payments team must verify the account and follow the approved alternative process before any funds are moved.\n\nRegards,\nClerwell Billing",
+      "allowedActions": [
+        "edit",
+        "reject",
+        "retry",
+        "escalate"
+      ],
+      "audit": {
+        "aiWorker": "Mira - Customer Operations",
+        "generatedAt": "2026-09-01T12:32:00+05:30",
+        "modelVersion": "mock-worker-2.3"
+      }
+    }
+  ]
+}
