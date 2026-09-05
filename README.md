@@ -4,6 +4,10 @@ A responsive React + TypeScript interface for reviewing AI-analyzed customer ema
 
 The application simulates a human-in-the-loop email approval workflow where reviewers can inspect incoming email context, evaluate AI Worker analysis, edit generated responses, and approve, reject, escalate, or retry an AI analysis.
 
+## Live Demo
+
+[Clerwell Email Review — Live Demo](https://clerwell-email-approval.vercel.app/)
+
 ## Features
 
 ### Email Review Queue
