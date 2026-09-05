@@ -26,6 +26,15 @@ export interface Audit {
   modelVersion: string;
 }
 
+export interface Policy {
+  id: string;
+  name: string;
+  category: string;
+  summary: string;
+  requiresHumanApproval: boolean;
+  riskFlags: string[];
+}
+
 export interface Email {
   id: string;
   queuePosition: number;

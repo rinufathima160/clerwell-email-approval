@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Email } from "./types/email";
+import type { Email, Policy } from "./types/email";
 import Header from "./components/Header";
 import Filters from "./components/Filters";
 import EmailList from "./components/EmailList";
@@ -22,10 +22,15 @@ function getSavedEmails(): Email[] {
 
 function App() {
   const [emails, setEmails] = useState<Email[]>(getSavedEmails);
+
   const [loading, setLoading] = useState(
     () => getSavedEmails().length === 0
   );
+
   const [error, setError] = useState("");
+
+  const [policies, setPolicies] = useState<Policy[]>([]);
+  const [policiesLoading, setPoliciesLoading] = useState(true);
 
   const [selectedEmail, setSelectedEmail] =
     useState<Email | null>(null);
@@ -35,6 +40,34 @@ function App() {
   const [riskFilter, setRiskFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  /*
+   * Load policies.
+   *
+   * Policies are separate from emails because the email only stores
+   * the policyId. We use that ID to find the full policy information.
+   */
+  useEffect(() => {
+    fetch("/mock-data/policies.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load policies");
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        setPolicies(data.policies as Policy[]);
+        setPoliciesLoading(false);
+      })
+      .catch(() => {
+        setPolicies([]);
+        setPoliciesLoading(false);
+      });
+  }, []);
+
+  /*
+   * Load emails.
+   */
   useEffect(() => {
     if (emails.length > 0) {
       return;
@@ -58,6 +91,9 @@ function App() {
       });
   }, [emails.length]);
 
+  /*
+   * Persist reviewer changes locally.
+   */
   useEffect(() => {
     if (emails.length > 0) {
       localStorage.setItem(
@@ -67,13 +103,28 @@ function App() {
     }
   }, [emails]);
 
+  /*
+   * Find the full policy associated with the selected email.
+   */
+  const selectedPolicy = selectedEmail
+    ? policies.find(
+        (policy) =>
+          policy.id === selectedEmail.aiAnalysis.policyId
+      )
+    : undefined;
+
+  /*
+   * Search and filters.
+   */
   const filteredEmails = emails.filter((email) => {
-    const searchText = search.toLowerCase();
+    const searchText = search.toLowerCase().trim();
 
     const matchesSearch =
+      searchText === "" ||
       email.subject.toLowerCase().includes(searchText) ||
       email.sender.name.toLowerCase().includes(searchText) ||
-      email.sender.email.toLowerCase().includes(searchText);
+      email.sender.email.toLowerCase().includes(searchText) ||
+      email.aiAnalysis.intent.toLowerCase().includes(searchText);
 
     const matchesPriority =
       priorityFilter === "all" ||
@@ -102,8 +153,13 @@ function App() {
     setStatusFilter("all");
   };
 
+  /*
+   * Selected email position.
+   */
   const selectedIndex = selectedEmail
-    ? emails.findIndex((email) => email.id === selectedEmail.id)
+    ? emails.findIndex(
+        (email) => email.id === selectedEmail.id
+      )
     : -1;
 
   const handlePrevious = () => {
@@ -123,6 +179,9 @@ function App() {
     setSelectedEmail(emails[selectedIndex + 1]);
   };
 
+  /*
+   * Approve & Send.
+   */
   const handleApprove = async () => {
     if (!selectedEmail) return;
 
@@ -130,20 +189,25 @@ function App() {
       setTimeout(resolve, 1000)
     );
 
-    const updatedEmail = {
+    const updatedEmail: Email = {
       ...selectedEmail,
       status: "approved",
     };
 
     setEmails((currentEmails) =>
       currentEmails.map((email) =>
-        email.id === updatedEmail.id ? updatedEmail : email
+        email.id === updatedEmail.id
+          ? updatedEmail
+          : email
       )
     );
 
     setSelectedEmail(updatedEmail);
   };
 
+  /*
+   * Reject.
+   */
   const handleReject = async () => {
     if (!selectedEmail) return;
 
@@ -151,20 +215,25 @@ function App() {
       setTimeout(resolve, 1000)
     );
 
-    const updatedEmail = {
+    const updatedEmail: Email = {
       ...selectedEmail,
       status: "rejected",
     };
 
     setEmails((currentEmails) =>
       currentEmails.map((email) =>
-        email.id === updatedEmail.id ? updatedEmail : email
+        email.id === updatedEmail.id
+          ? updatedEmail
+          : email
       )
     );
 
     setSelectedEmail(updatedEmail);
   };
 
+  /*
+   * Escalate.
+   */
   const handleEscalate = async () => {
     if (!selectedEmail) return;
 
@@ -172,7 +241,7 @@ function App() {
       setTimeout(resolve, 1000)
     );
 
-    const updatedEmail = {
+    const updatedEmail: Email = {
       ...selectedEmail,
       status: "escalated",
     };
@@ -188,40 +257,65 @@ function App() {
     setSelectedEmail(updatedEmail);
   };
 
+  /*
+   * Ask AI Worker to Retry.
+   */
   const handleRetry = (guidance: string) => {
     if (!selectedEmail) return;
 
+    const trimmedGuidance = guidance.trim();
+
+    const retryMessage = trimmedGuidance
+      ? `
+
+Reviewer guidance: ${trimmedGuidance}
+
+AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`
+      : `
+
+AI worker retry: The analysis was re-evaluated after reviewer requested another analysis.`;
+
     const updatedEmail: Email = {
       ...selectedEmail,
+
       status: "pending_review",
+
       aiAnalysis: {
         ...selectedEmail.aiAnalysis,
-        rationale: `${selectedEmail.aiAnalysis.rationale}
 
-Reviewer guidance: ${guidance}
-
-AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
+        rationale:
+          selectedEmail.aiAnalysis.rationale +
+          retryMessage,
       },
+
       audit: {
         ...selectedEmail.audit,
+
         generatedAt: new Date().toISOString(),
-        modelVersion: `${selectedEmail.audit.modelVersion}-retry`,
+
+        modelVersion:
+          `${selectedEmail.audit.modelVersion}-retry`,
       },
     };
 
     setEmails((currentEmails) =>
       currentEmails.map((email) =>
-        email.id === updatedEmail.id ? updatedEmail : email
+        email.id === updatedEmail.id
+          ? updatedEmail
+          : email
       )
     );
 
     setSelectedEmail(updatedEmail);
   };
 
+  /*
+   * Save edited draft locally.
+   */
   const handleSaveDraft = (draft: string) => {
     if (!selectedEmail) return;
 
-    const updatedEmail = {
+    const updatedEmail: Email = {
       ...selectedEmail,
       draftResponse: draft,
     };
@@ -237,6 +331,9 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
     setSelectedEmail(updatedEmail);
   };
 
+  /*
+   * Retry loading the email dataset.
+   */
   const handleRetryLoad = () => {
     setError("");
     setLoading(true);
@@ -259,7 +356,10 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
       });
   };
 
-  if (loading) {
+  /*
+   * Loading state.
+   */
+  if (loading || policiesLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
         <div className="text-center">
@@ -268,17 +368,20 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
           </div>
 
           <h1 className="text-lg font-semibold text-zinc-100">
-            Loading emails...
+            Loading approval queue...
           </h1>
 
           <p className="mt-1 text-sm text-zinc-600">
-            Preparing your approval queue
+            Preparing emails and policy context
           </p>
         </div>
       </div>
     );
   }
 
+  /*
+   * Error state.
+   */
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
@@ -307,6 +410,9 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
     );
   }
 
+  /*
+   * Email detail screen.
+   */
   if (selectedEmail) {
     return (
       <div className="min-h-screen bg-zinc-950">
@@ -314,6 +420,7 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
           <EmailDetail
             key={selectedEmail.id}
             email={selectedEmail}
+            policy={selectedPolicy}
             onBack={() => setSelectedEmail(null)}
             onPrevious={handlePrevious}
             onNext={handleNext}
@@ -330,6 +437,9 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
     );
   }
 
+  /*
+   * Queue screen.
+   */
   return (
     <div className="min-h-screen bg-zinc-950">
       <Header
@@ -366,6 +476,7 @@ AI worker retry: The analysis was re-evaluated using the reviewer's guidance.`,
                   stroke="currentColor"
                   strokeWidth="1.8"
                 />
+
                 <path
                   d="M16 16L20 20"
                   stroke="currentColor"

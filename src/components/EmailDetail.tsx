@@ -1,9 +1,10 @@
 import { useState } from "react";
-import type { Email } from "../types/email";
+import type { Email, Policy } from "../types/email";
 import ApprovalActions from "./ApprovalActions";
 
 type EmailDetailProps = {
   email: Email;
+  policy?: Policy;
   onBack: () => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -18,6 +19,7 @@ type EmailDetailProps = {
 
 function EmailDetail({
   email,
+  policy,
   onBack,
   onPrevious,
   onNext,
@@ -74,10 +76,13 @@ function EmailDetail({
   const statusStyles = {
     pending_review:
       "bg-amber-500/10 text-amber-400 border-amber-500/20",
+
     approved:
       "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+
     rejected:
       "bg-red-500/10 text-red-400 border-red-500/20",
+
     escalated:
       "bg-orange-500/10 text-orange-400 border-orange-500/20",
   };
@@ -99,6 +104,20 @@ function EmailDetail({
       email.status as keyof typeof statusLabels
     ] ?? email.status;
 
+  const confidencePercentage = Math.round(
+    email.aiAnalysis.confidence * 100
+  );
+
+  const riskLevel =
+    email.aiAnalysis.riskLevel.toLowerCase();
+
+  const riskClass =
+    riskLevel === "high"
+      ? "text-red-400"
+      : riskLevel === "medium"
+      ? "text-amber-400"
+      : "text-emerald-400";
+
   return (
     <div className="space-y-5 sm:space-y-6">
       {/* Back */}
@@ -119,7 +138,10 @@ function EmailDetail({
           disabled={currentPosition === 1}
           className="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm font-medium text-zinc-300 transition hover:border-zinc-600 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-30 sm:px-4"
         >
-          ← <span className="hidden sm:inline">Previous</span>
+          ←{" "}
+          <span className="hidden sm:inline">
+            Previous
+          </span>
         </button>
 
         <span className="text-xs font-medium text-zinc-500 sm:text-sm">
@@ -139,7 +161,10 @@ function EmailDetail({
           disabled={currentPosition === totalEmails}
           className="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm font-medium text-zinc-300 transition hover:border-zinc-600 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-30 sm:px-4"
         >
-          <span className="hidden sm:inline">Next </span>→
+          <span className="hidden sm:inline">
+            Next{" "}
+          </span>
+          →
         </button>
       </div>
 
@@ -155,8 +180,19 @@ function EmailDetail({
 
             <p className="mt-2 break-words text-sm text-zinc-500 sm:text-base">
               {email.sender.name}
-              <span className="mx-1.5 text-zinc-700">·</span>
+
+              <span className="mx-1.5 text-zinc-700">
+                ·
+              </span>
+
               {email.sender.email}
+            </p>
+
+            <p className="mt-1 text-xs text-zinc-600">
+              Received{" "}
+              {new Date(
+                email.receivedAt
+              ).toLocaleString()}
             </p>
           </div>
 
@@ -203,7 +239,9 @@ function EmailDetail({
                 </strong>
 
                 <span className="text-xs text-zinc-600">
-                  {new Date(message.at).toLocaleString()}
+                  {new Date(
+                    message.at
+                  ).toLocaleString()}
                 </span>
               </div>
 
@@ -215,27 +253,39 @@ function EmailDetail({
         </div>
       </section>
 
-      {/* Attachments */}
+      {/* Attachments / Evidence */}
       <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 shadow-xl shadow-black/10 sm:p-6">
         <h2 className="text-lg font-semibold text-zinc-100 sm:text-xl">
           Attachments / Evidence
         </h2>
 
         <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-          {email.aiAnalysis.missingInformation.length > 0 ? (
+          {email.aiAnalysis.missingInformation.length >
+          0 ? (
             <>
-              <p className="text-sm font-semibold text-amber-400">
-                Missing evidence
-              </p>
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
+                  !
+                </span>
 
-              <p className="mt-1 text-sm text-zinc-400">
-                The incoming email does not include all evidence needed
-                for review.
+                <p className="text-sm font-semibold text-amber-400">
+                  Missing evidence
+                </p>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-zinc-400">
+                The incoming email does not include all
+                evidence needed for review.
               </p>
 
               <p className="mt-2 text-xs font-medium text-zinc-600">
-                {email.aiAnalysis.missingInformation.length} item
-                {email.aiAnalysis.missingInformation.length !== 1
+                {
+                  email.aiAnalysis.missingInformation
+                    .length
+                }{" "}
+                item
+                {email.aiAnalysis.missingInformation
+                  .length !== 1
                   ? "s"
                   : ""}{" "}
                 may be required.
@@ -243,13 +293,19 @@ function EmailDetail({
             </>
           ) : (
             <>
-              <p className="text-sm font-semibold text-zinc-300">
-                No attachments provided
-              </p>
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                  ✓
+                </span>
 
-              <p className="mt-1 text-sm text-zinc-500">
-                No additional evidence is required based on the current
-                analysis.
+                <p className="text-sm font-semibold text-zinc-300">
+                  Evidence appears complete
+                </p>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-zinc-500">
+                No additional evidence is required based
+                on the current analysis.
               </p>
             </>
           )}
@@ -263,67 +319,56 @@ function EmailDetail({
             ✦
           </div>
 
-          <h2 className="text-lg font-semibold text-zinc-100 sm:text-xl">
-            AI Analysis
-          </h2>
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-100 sm:text-xl">
+              AI Worker Analysis
+            </h2>
+
+            <p className="text-xs text-zinc-600">
+              Review the recommendation before taking action
+            </p>
+          </div>
         </div>
 
+        {/* Analysis summary */}
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {/* Intent */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
               Intent
             </p>
+
             <p className="mt-1 break-words text-sm font-semibold text-zinc-200">
               {email.aiAnalysis.intent}
             </p>
           </div>
 
+          {/* Confidence */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
-              Policy Used
-            </p>
-
-            {email.aiAnalysis.policyId ? (
-              <p className="mt-1 break-words text-sm font-semibold text-zinc-200">
-                {email.aiAnalysis.policyId}
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
+                Confidence
               </p>
-            ) : (
-              <p
-                className="mt-1 text-sm font-semibold text-amber-400"
-                role="status"
-                aria-live="polite"
-              >
-                Policy context unavailable
-              </p>
-            )}
-          </div>
 
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
-              Model Version
-            </p>
-            <p className="mt-1 break-words text-sm font-semibold text-zinc-200">
-              {email.audit.modelVersion}
-            </p>
-          </div>
+              <span className="text-sm font-bold text-zinc-100">
+                {confidencePercentage}%
+              </span>
+            </div>
 
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
-              Generated At
-            </p>
-            <p className="mt-1 text-sm font-semibold text-zinc-200">
-              {new Date(email.audit.generatedAt).toLocaleString()}
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
-              Confidence
-            </p>
-
-            <p className="mt-1 text-sm font-semibold text-zinc-200">
-              {Math.round(email.aiAnalysis.confidence * 100)}%
-            </p>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-800">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  confidencePercentage >= 80
+                    ? "bg-emerald-500"
+                    : confidencePercentage >= 60
+                    ? "bg-amber-500"
+                    : "bg-red-500"
+                }`}
+                style={{
+                  width: `${confidencePercentage}%`,
+                }}
+              />
+            </div>
 
             {email.aiAnalysis.confidence < 0.8 && (
               <p
@@ -336,25 +381,123 @@ function EmailDetail({
             )}
           </div>
 
+          {/* Risk */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
               Risk Level
             </p>
-            <p className="mt-1 text-sm font-semibold text-zinc-200">
+
+            <p
+              className={`mt-1 text-sm font-bold uppercase ${riskClass}`}
+            >
               {email.aiAnalysis.riskLevel}
+            </p>
+
+            <p className="mt-1 text-xs leading-5 text-zinc-600">
+              Confidence does not determine safety. Review
+              the risk context before approving.
             </p>
           </div>
 
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 sm:col-span-2">
+          {/* Sentiment */}
+          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
               Sentiment
             </p>
+
             <p className="mt-1 text-sm font-semibold text-zinc-200">
               {email.aiAnalysis.sentiment}
             </p>
           </div>
         </div>
 
+        {/* Governing Policy */}
+        <div className="mt-4 rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
+              §
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-violet-400">
+                Governing Policy
+              </p>
+
+              {policy ? (
+                <>
+                  <h3 className="mt-1 break-words text-base font-semibold text-zinc-100">
+                    {policy.name}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-zinc-400">
+                    {policy.summary}
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-400">
+                      ID: {policy.id}
+                    </span>
+
+                    <span className="rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-400">
+                      Category: {policy.category}
+                    </span>
+
+                    <span
+                      className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                        policy.requiresHumanApproval
+                          ? "border-amber-500/20 bg-amber-500/10 text-amber-400"
+                          : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                      }`}
+                    >
+                      {policy.requiresHumanApproval
+                        ? "Human approval required"
+                        : "Human approval not required"}
+                    </span>
+                  </div>
+
+                  {policy.riskFlags.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
+                        Policy Risk Flags
+                      </p>
+
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {policy.riskFlags.map(
+                          (flag) => (
+                            <span
+                              key={flag}
+                              className="rounded-lg border border-zinc-800 bg-zinc-950 px-2.5 py-1.5 text-xs text-zinc-400"
+                            >
+                              {flag}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="mt-1 text-sm font-semibold text-amber-400">
+                    Policy context unavailable
+                  </p>
+
+                  <p className="mt-2 text-xs leading-5 text-zinc-600">
+                    The AI analysis references policy ID{" "}
+                    <span className="text-zinc-400">
+                      {email.aiAnalysis.policyId ||
+                        "unknown"}
+                    </span>
+                    , but the full policy could not be
+                    loaded.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Recommended Action */}
         <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
             Recommended Action
@@ -365,6 +508,7 @@ function EmailDetail({
           </p>
         </div>
 
+        {/* Rationale */}
         <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
           <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
             Rationale
@@ -375,27 +519,72 @@ function EmailDetail({
           </p>
         </div>
 
-        {email.aiAnalysis.missingInformation.length > 0 && (
+        {/* Missing information */}
+        {email.aiAnalysis.missingInformation.length >
+          0 && (
           <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-amber-400">
               Missing Information
             </p>
 
             <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-amber-200">
-              {email.aiAnalysis.missingInformation.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
+              {email.aiAnalysis.missingInformation.map(
+                (item) => (
+                  <li key={item}>{item}</li>
+                )
+              )}
             </ul>
           </div>
         )}
+
+        {/* Audit */}
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
+              AI Worker
+            </p>
+
+            <p className="mt-1 break-words text-sm font-semibold text-zinc-200">
+              {email.audit.aiWorker}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
+              Model Version
+            </p>
+
+            <p className="mt-1 break-words text-sm font-semibold text-zinc-200">
+              {email.audit.modelVersion}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 sm:col-span-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-zinc-600">
+              Analysis Generated
+            </p>
+
+            <p className="mt-1 text-sm font-semibold text-zinc-200">
+              {new Date(
+                email.audit.generatedAt
+              ).toLocaleString()}
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Draft Response */}
       <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 shadow-xl shadow-black/10 sm:p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold text-zinc-100 sm:text-xl">
-            Draft Response
-          </h2>
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-100 sm:text-xl">
+              Draft Response
+            </h2>
+
+            <p className="mt-1 text-xs text-zinc-600">
+              Review and edit the response before sending.
+            </p>
+          </div>
 
           {hasUnsavedChanges && (
             <span
@@ -447,7 +636,9 @@ function EmailDetail({
         >
           <div
             className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
           >
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400">
               !
@@ -458,14 +649,16 @@ function EmailDetail({
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-zinc-500">
-              You have unsaved changes to this draft. Leave without
-              saving?
+              You have unsaved changes to this draft. Leave
+              without saving?
             </p>
 
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={() => setNavigationAction(null)}
+                onClick={() =>
+                  setNavigationAction(null)
+                }
                 className="w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-zinc-800 hover:text-zinc-100 sm:w-auto"
               >
                 Stay
@@ -474,13 +667,22 @@ function EmailDetail({
               <button
                 type="button"
                 onClick={() => {
-                  const action = navigationAction;
+                  const action =
+                    navigationAction;
 
                   setNavigationAction(null);
 
-                  if (action === "back") onBack();
-                  if (action === "previous") onPrevious();
-                  if (action === "next") onNext();
+                  if (action === "back") {
+                    onBack();
+                  }
+
+                  if (action === "previous") {
+                    onPrevious();
+                  }
+
+                  if (action === "next") {
+                    onNext();
+                  }
                 }}
                 className="w-full rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500 sm:w-auto"
               >

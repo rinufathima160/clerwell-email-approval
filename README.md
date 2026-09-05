@@ -20,17 +20,39 @@ The application simulates a human-in-the-loop email approval workflow where revi
 - Full email subject and sender information.
 - Conversation and thread history with timestamps.
 - Labels and attachment / missing-evidence indicators.
-- AI Worker analysis including:
-  - Intent
-  - Confidence
-  - Policy used
-  - Risk level
-  - Sentiment
-  - Recommended action
-  - Rationale
-  - Missing information
-  - Model version
-  - Generated timestamp
+### AI Worker Analysis
+
+The AI Worker analysis provides structured information to help the reviewer evaluate the recommendation before taking action.
+
+It includes:
+
+- Intent
+- Confidence
+- Risk level
+- Sentiment
+- Governing policy
+- Policy information
+- Policy ID
+- Policy category
+- Policy conditions / risk flags
+- Recommended action
+- Rationale
+- Missing information
+- Model version
+- Generated timestamp
+
+The **Governing Policy** section displays the policy name and relevant policy information instead of exposing only a policy identifier. It also surfaces applicable policy conditions or risk flags and indicates when human approval is required.
+
+For example, a refund request may be associated with:
+
+- **Governing Policy:** Refund Policy 3.2
+- **Policy ID:** refund-3.2
+- **Category:** refunds
+- **Policy information:** Standard purchases may be refunded to the original payment method within 30 days when eligibility checks pass.
+- **Policy conditions / risk flags:** amount over 5000 INR, payment method mismatch, outside window
+- **Human approval:** required
+
+This gives the reviewer policy context alongside the AI recommendation rather than requiring the reviewer to interpret a policy ID alone.
 
 ### Draft Response
 
@@ -112,6 +134,28 @@ Run ESLint:
 ```bash
 npm run lint
 ```
+## Testing
+
+The project uses **Vitest** and **React Testing Library** for focused component testing.
+
+Run the test suite with:
+
+```bash
+npm test
+
+```
+The current tests cover the ApprovalActions component:
+
+- Verifies that all available review actions are    displayed.
+- Verifies that AI retry requires reviewer guidance.
+- Verifies that approval requires confirmation before onApprove is called.
+
+Current test result:
+
+Test Files: 1 passed
+Tests: 3 passed
+
+The tests are focused on critical reviewer interactions and can be expanded to cover additional workflows such as rejection, escalation, filtering, and unsaved draft protection.
 
 ## Project Structure
 
@@ -121,17 +165,22 @@ src/
 │   ├── ApprovalActions.tsx
 │   ├── EmailCard.tsx
 │   ├── EmailDetail.tsx
+|   ├── ApprovalActions.test.tsx
 │   ├── EmailList.tsx
 │   ├── Filters.tsx
 │   └── Header.tsx
 ├── types/
 │   └── email.ts
+├── test/
+│   └── setup.ts
 ├── App.tsx
 └── index.css
 
 public/
 └── mock-data/
     └── emails.json
+    └── policies.json
+
 ```
 
 ## Architecture
@@ -161,17 +210,25 @@ The mock dataset is loaded from:
 
 ```text
 /public/mock-data/emails.json
+/public/mock-data/policies.json
 ```
 
 Reviewer changes are persisted in browser `localStorage`, allowing draft edits and review decisions to remain available after a page refresh.
 
 ## Review Workflow
 
-1. Reviewer opens the email approval queue.
+11. Reviewer opens the email approval queue.
 2. Reviewer searches or filters emails if required.
 3. Reviewer selects an email.
 4. The email conversation and AI Worker analysis are reviewed.
-5. Missing evidence, policy context, confidence, and risk are considered.
+5. The reviewer evaluates:
+   - Governing policy
+   - Policy information
+   - Policy conditions / risk flags
+   - Confidence
+   - Risk level
+   - Missing evidence
+   - AI rationale
 6. The reviewer can edit the generated draft response.
 7. The reviewer can:
    - Approve & Send
@@ -190,6 +247,8 @@ A high-confidence AI analysis does not automatically mean that an email is safe 
 
 Low-confidence analysis and missing policy context are explicitly surfaced for manual review.
 
+Policy context is presented as part of the review decision rather than as a replacement for human judgment. The reviewer can see the governing policy, policy information, applicable conditions or risk flags, and whether human approval is required before taking an action.
+
 ## Data & Persistence
 
 This project does not require a backend.
@@ -205,9 +264,10 @@ The final implementation was validated with:
 ```bash
 npm run lint
 npm run build
+npm test -- --run
 ```
 
-Both commands complete successfully.
+The lint, production build, and automated test suite complete successfully.
 
 ## Trade-offs & Assumptions
 
@@ -216,7 +276,7 @@ Both commands complete successfully.
 - The application uses local React state and browser `localStorage` instead of a backend because the assignment does not require a real API or email delivery service.
 - AI retry, approval, rejection, and escalation flows are simulated locally to demonstrate the reviewer experience and state transitions.
 - The interface prioritizes review context and decision-making over adding unnecessary UI features or external dependencies.
-- Automated tests were not added because the assignment makes them optional and the available time was prioritized toward core functionality, accessibility, responsive behaviour, and interaction quality.
+- Automated testing is currently focused on the critical `ApprovalActions` reviewer workflows using Vitest and React Testing Library. Broader workflow coverage could be added with more time.
 
 ### Assumptions
 
@@ -230,7 +290,7 @@ Both commands complete successfully.
 
 With additional time, I would:
 
-- Add focused automated tests for critical review workflows such as approval, rejection, retry, filtering, and unsaved draft protection.
+- Expand automated test coverage to additional critical workflows such as rejection, escalation, filtering, and unsaved draft protection.
 - Add more comprehensive error and failure simulations for action requests.
 - Improve persistence with a more structured local data layer or backend integration if required.
 - Add additional keyboard-navigation and accessibility testing with automated accessibility tooling.
