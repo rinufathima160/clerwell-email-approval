@@ -16,7 +16,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [riskFilter, setRiskFilter] = useState("all");
-
+const [statusFilter, setStatusFilter] = useState("all");
   useEffect(() => {
     fetch("/mock-data/emails.json")
       .then((response) => {
@@ -51,19 +51,24 @@ function App() {
     const matchesRisk =
       riskFilter === "all" ||
       email.aiAnalysis.riskLevel === riskFilter;
+    const matchesStatus =
+  statusFilter === "all" ||
+  email.status === statusFilter;
 
     return (
-      matchesSearch &&
-      matchesPriority &&
-      matchesRisk
-    );
+  matchesSearch &&
+  matchesPriority &&
+  matchesRisk &&
+  matchesStatus
+);
   });
 
   const clearFilters = () => {
-    setSearch("");
-    setPriorityFilter("all");
-    setRiskFilter("all");
-  };
+  setSearch("");
+  setPriorityFilter("all");
+  setRiskFilter("all");
+  setStatusFilter("all");
+};
 
   // Approve email
   const handleApprove = () => {
@@ -182,14 +187,16 @@ function App() {
 
       <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Filters
-          search={search}
-          priorityFilter={priorityFilter}
-          riskFilter={riskFilter}
-          setSearch={setSearch}
-          setPriorityFilter={setPriorityFilter}
-          setRiskFilter={setRiskFilter}
-          clearFilters={clearFilters}
-        />
+  search={search}
+  priorityFilter={priorityFilter}
+  riskFilter={riskFilter}
+  statusFilter={statusFilter}
+  setSearch={setSearch}
+  setPriorityFilter={setPriorityFilter}
+  setRiskFilter={setRiskFilter}
+  setStatusFilter={setStatusFilter}
+  clearFilters={clearFilters}
+/>
 
         <EmailList
           emails={filteredEmails}
