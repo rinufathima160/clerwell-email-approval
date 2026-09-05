@@ -65,6 +65,66 @@ function App() {
     setRiskFilter("all");
   };
 
+  // Approve email
+  const handleApprove = () => {
+    if (!selectedEmail) return;
+
+    const updatedEmail = {
+      ...selectedEmail,
+      status: "approved",
+    };
+
+    setEmails((currentEmails) =>
+      currentEmails.map((email) =>
+        email.id === updatedEmail.id
+          ? updatedEmail
+          : email
+      )
+    );
+
+    setSelectedEmail(updatedEmail);
+  };
+
+  // Reject email
+  const handleReject = () => {
+    if (!selectedEmail) return;
+
+    const updatedEmail = {
+      ...selectedEmail,
+      status: "rejected",
+    };
+
+    setEmails((currentEmails) =>
+      currentEmails.map((email) =>
+        email.id === updatedEmail.id
+          ? updatedEmail
+          : email
+      )
+    );
+
+    setSelectedEmail(updatedEmail);
+  };
+
+  // Save edited response
+  const handleSaveDraft = (draft: string) => {
+    if (!selectedEmail) return;
+
+    const updatedEmail = {
+      ...selectedEmail,
+      draftResponse: draft,
+    };
+
+    setEmails((currentEmails) =>
+      currentEmails.map((email) =>
+        email.id === updatedEmail.id
+          ? updatedEmail
+          : email
+      )
+    );
+
+    setSelectedEmail(updatedEmail);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
@@ -95,6 +155,7 @@ function App() {
     );
   }
 
+  // Email detail page
   if (selectedEmail) {
     return (
       <div className="min-h-screen bg-slate-50">
@@ -102,12 +163,16 @@ function App() {
           <EmailDetail
             email={selectedEmail}
             onBack={() => setSelectedEmail(null)}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onSaveDraft={handleSaveDraft}
           />
         </main>
       </div>
     );
   }
 
+  // Main queue
   return (
     <div className="min-h-screen bg-slate-50">
       <Header
