@@ -11,13 +11,13 @@ function EmailCard({
 }: EmailCardProps) {
   const priorityStyles = {
     critical:
-      "bg-red-100 text-red-700 border border-red-200",
+      "bg-red-50 text-red-700 border-red-200",
     urgent:
-      "bg-amber-100 text-amber-700 border border-amber-200",
+      "bg-amber-50 text-amber-700 border-amber-200",
     normal:
-      "bg-slate-100 text-slate-700 border border-slate-200",
+      "bg-slate-50 text-slate-700 border-slate-200",
     low:
-      "bg-blue-100 text-blue-700 border border-blue-200",
+      "bg-blue-50 text-blue-700 border-blue-200",
   };
 
   const priorityClass =
@@ -29,40 +29,96 @@ function EmailCard({
     <button
       type="button"
       onClick={onClick}
-      className="group w-full rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-slate-300 sm:p-5"
+      className="
+        group w-full
+        rounded-xl
+        border border-slate-200
+        bg-white
+        p-4
+        text-left
+        shadow-sm
+        transition-all duration-200
+        hover:border-slate-300
+        hover:shadow-md
+        focus:outline-none
+        focus:ring-2
+        focus:ring-slate-300
+        sm:p-5
+      "
     >
-      <div className="flex gap-3 sm:gap-5">
+      <div className="flex gap-3 sm:gap-4">
+
         {/* Queue number */}
-        <div className="flex shrink-0 items-start pt-1">
-          <span className="text-sm font-semibold text-slate-400 sm:text-base">
+        <div className="shrink-0 pt-1">
+          <span className="text-sm font-semibold text-slate-400">
             #{email.queuePosition}
           </span>
         </div>
 
-        {/* Main content */}
+        {/* Email content */}
         <div className="min-w-0 flex-1">
-          {/* Subject + priority */}
+
+          {/* Subject + Priority */}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <h3 className="min-w-0 text-base font-semibold leading-6 text-slate-900 group-hover:text-slate-700 sm:text-lg">
+
+            <h3
+              className="
+                min-w-0
+                text-base
+                font-semibold
+                leading-6
+                text-slate-900
+                transition-colors
+                group-hover:text-slate-700
+                sm:text-lg
+              "
+            >
               {email.subject}
             </h3>
 
             <span
-              className={`w-fit shrink-0 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${priorityClass}`}
+              className={`
+                w-fit
+                shrink-0
+                rounded-full
+                border
+                px-2.5
+                py-1
+                text-[11px]
+                font-semibold
+                uppercase
+                tracking-wide
+                sm:px-3
+                sm:text-xs
+                ${priorityClass}
+              `}
             >
               {email.priority}
             </span>
+
           </div>
 
           {/* Sender */}
           <p className="mt-2 truncate text-sm text-slate-500">
             {email.sender.name}
-            <span className="mx-1">·</span>
+            <span className="mx-1 text-slate-300">·</span>
             {email.sender.email}
           </p>
 
           {/* Email information */}
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600">
+          <div
+            className="
+              mt-4
+              grid
+              grid-cols-1
+              gap-2
+              text-sm
+              text-slate-600
+              sm:flex
+              sm:flex-wrap
+              sm:gap-x-6
+            "
+          >
             <span>
               <span className="font-medium text-slate-800">
                 Risk:
@@ -89,16 +145,27 @@ function EmailCard({
           </div>
 
           {/* Labels */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            {email.labels.map((label) => (
-              <span
-                key={label}
-                className="rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700"
-              >
-                {label}
-              </span>
-            ))}
-          </div>
+          {email.labels.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {email.labels.map((label) => (
+                <span
+                  key={label}
+                  className="
+                    rounded-md
+                    bg-indigo-50
+                    px-2.5
+                    py-1
+                    text-xs
+                    font-medium
+                    text-indigo-700
+                  "
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          )}
+
         </div>
       </div>
     </button>
