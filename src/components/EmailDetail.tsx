@@ -211,6 +211,7 @@ function EmailDetail({
         isEditing={isEditing}
         draftResponse={draftResponse}
         onDraftChange={setDraftResponse}
+        
         onSave={() => {
           onSaveDraft(draftResponse);
           setIsEditing(false);
@@ -219,6 +220,7 @@ function EmailDetail({
           setDraftResponse(email.draftResponse);
           setIsEditing(false);
         }}
+        allowedActions={email.allowedActions}
       />
     </div>
   );

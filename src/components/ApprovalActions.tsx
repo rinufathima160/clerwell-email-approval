@@ -9,6 +9,7 @@ type ApprovalActionsProps = {
   onDraftChange: (value: string) => void;
   onSave: () => void;
   onCancel: () => void;
+  allowedActions: string[];
 };
 
 function ApprovalActions({
@@ -20,12 +21,17 @@ function ApprovalActions({
   onDraftChange,
   onSave,
   onCancel,
+  allowedActions,
 }: ApprovalActionsProps) {
   const [confirmation, setConfirmation] = useState<
     "approve" | "reject" | null
   >(null);
 
   const [message, setMessage] = useState("");
+
+  const canApprove = allowedActions.includes("approve_send");
+  const canReject = allowedActions.includes("reject");
+  const canEdit = allowedActions.includes("edit");
 
   const handleConfirm = () => {
     if (confirmation === "approve") {
@@ -40,7 +46,6 @@ function ApprovalActions({
 
     setConfirmation(null);
 
-    // Remove success message after a short time
     setTimeout(() => {
       setMessage("");
     }, 3000);
@@ -95,36 +100,55 @@ function ApprovalActions({
 
         {/* Success message */}
         {message && (
-          <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+          <div
+            role="status"
+            className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
+          >
             ✓ {message}
           </div>
         )}
 
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <button
-            type="button"
-            onClick={() => setConfirmation("approve")}
-            className="w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-          >
-            Approve
-          </button>
+          {/* Approve */}
+          {canApprove && (
+            <button
+              type="button"
+              onClick={() => setConfirmation("approve")}
+              className="w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+            >
+              Approve
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={() => setConfirmation("reject")}
-            className="w-full rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
-          >
-            Reject
-          </button>
+          {/* Reject */}
+          {canReject && (
+            <button
+              type="button"
+              onClick={() => setConfirmation("reject")}
+              className="w-full rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300"
+            >
+              Reject
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={onEdit}
-            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-          >
-            Edit Response
-          </button>
+          {/* Edit Response */}
+          {canEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Edit Response
+            </button>
+          )}
         </div>
+
+        {/* No available actions */}
+        {!canApprove && !canReject && !canEdit && (
+          <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            No approval actions are currently available for this email.
+          </div>
+        )}
       </section>
 
       {/* Confirmation Modal */}
